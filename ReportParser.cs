@@ -1,38 +1,27 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.IO;
-using System.Text.RegularExpressions;
+﻿using HtmlAgilityPack;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
 
-using HtmlAgilityPack;
-
-namespace SBCM
-{
-    internal class ReportParser
-    {
-        static string GetStringWithinEndParentheses(string str)
-        {
+namespace SBCM {
+    internal class ReportParser {
+        static string GetStringWithinEndParentheses(string str) {
             string newType = "";
             char[] typeChars = str.ToCharArray();
             int parenBreak = 1;
-            for (int i = 1; i < str.Length; i++)
-            {
+            for (int i = 1; i < str.Length; i++) {
                 char c = typeChars[str.Length - i - 1];
-                if (c == '(')
-                {
+                if (c == '(') {
                     parenBreak--;
-                }
-                else if (c == ')')
-                {
+                } else if (c == ')') {
                     parenBreak++;
                 }
 
-                if (parenBreak == 0)
-                {
+                if (parenBreak == 0) {
                     break;
-                }
-                else
-                {
+                } else {
                     newType = c + newType;
                 }
             }
@@ -40,15 +29,11 @@ namespace SBCM
             return newType;
         }
 
-        static void ParseGunAmmo(IEnumerable<HtmlNode> row, ref int columnIndex, ref GunAmmo gun, bool initialSetting = false)
-        {
+        static void ParseGunAmmo(IEnumerable<HtmlNode> row, ref int columnIndex, ref GunAmmo gun, bool initialSetting = false) {
             string gunType = row.ElementAt(columnIndex).InnerHtml;
-            if (gunType == "&nbsp;")
-            {
+            if (gunType == "&nbsp;") {
                 gun.Type = "";
-            }
-            else
-            {
+            } else {
                 // Get ammo type from within parentheses
                 gun.Type = GetStringWithinEndParentheses(gunType);
             }
@@ -56,13 +41,10 @@ namespace SBCM
             int start = int.Parse(row.ElementAt(columnIndex + 1).InnerHtml);
             int end = int.Parse(row.ElementAt(columnIndex + 2).InnerHtml);
 
-            if (initialSetting)
-            {
+            if (initialSetting) {
                 gun.Maximum = start;
                 gun.Amount = end;
-            }
-            else
-            {
+            } else {
                 //gun.Amount -= start - end;
                 gun.Amount = end; // We'll trust the report as the final word on ammo level
             }
@@ -78,14 +60,16 @@ namespace SBCM
 
             return next;
         }
+
         public static bool MergeReport(
             string filename,
             Dictionary<string, Player> scenarioPlayers,
-            Dictionary<string, Force> scenarioForces,
-            bool CAMPAIGN_INITIALIZING = false
+            Dictionary<string, Force> scenarioForces
         ) {
             var htmlDoc = new HtmlDocument();
             htmlDoc.Load(filename);
+
+            bool campaignInitializing = scenarioForces.Count == 0;
 
             // Verify that report is in supported game version
             /* // ENABLE THIS LATER
@@ -122,8 +106,7 @@ namespace SBCM
 
             // Determine forces in play
             HtmlNodeCollection forcesRows = forcesTable.SelectNodes("tr");
-            for (int i = 1; i < forcesRows.Count; i++)
-            {
+            for (int i = 1; i < forcesRows.Count; i++) {
                 HtmlNode forceRowNode = forcesRows[i];
                 var forceNameColumn = forceRowNode.Elements("td").ElementAt(0);
                 string forceName = forceNameColumn.InnerHtml;
@@ -136,79 +119,62 @@ namespace SBCM
             // Parse force & event information
             bool eventsParsed = false;
             HtmlNodeCollection headers = htmlDoc.DocumentNode.SelectNodes("//h2");
-            foreach (HtmlNode header in headers)
-            {
-                if (header.InnerHtml.Equals("Players"))
-                {
+            foreach (HtmlNode header in headers) {
+                if (header.InnerHtml.Equals("Players")) {
                     // Parse player stats
                     HtmlNode head = header;
 
                     Regex statRegex = new Regex(@"(\d+) out of (\d+)");
                     Regex lossesRegex = new Regex(@"Total losses - (tanks|PCs|personnel|helicopters|trucks):");
 
-                    for (int i = 0; i < numPlayers; i++)
-                    {
+                    for (int i = 0; i < numPlayers; i++) {
                         HtmlNode playerForceNode = NextSiblingElement(head);
                         string playerForceString = playerForceNode.InnerHtml;
                         string playerForce = GetStringWithinEndParentheses(playerForceString);
                         string playerName = playerForceString.Replace(" (" + playerForce + ")", "");
 
                         Player player;
-                        if (scenarioPlayers.ContainsKey(playerName))
-                        {
+                        if (scenarioPlayers.ContainsKey(playerName)) {
                             player = scenarioPlayers[playerName];
-                        }
-                        else
-                        {
+                        } else {
                             player = new Player(playerName);
                             scenarioPlayers.Add(playerName, player);
                         }
 
                         HtmlNode playerStatsTable = NextSiblingElement(playerForceNode);
                         var rows = playerStatsTable.Descendants("tr").ToList();
-                        foreach (var row in rows)
-                        {
+                        foreach (var row in rows) {
                             var columns = row.Descendants("td");
                             string rowHeader = columns.ElementAt(0).InnerHtml;
                             string secondColumn = columns.ElementAt(1).InnerHtml;
 
-                            if (rowHeader == "Hit percentage:")
-                            {
+                            if (rowHeader == "Hit percentage:") {
                                 Match m = statRegex.Match(columns.ElementAt(2).InnerHtml);
-                                if (m.Success)
-                                {
+                                if (m.Success) {
                                     player.ShotsHit += int.Parse(m.Groups[1].Value);
                                     player.ShotsTaken += int.Parse(m.Groups[2].Value);
                                 }
-                            } else if(rowHeader == "User kills (Vehicle):")
-                            {
+                            } else if (rowHeader == "User kills (Vehicle):") {
                                 player.PersonalKills += int.Parse(secondColumn);
-                            } else if(rowHeader == "User losses (Vehicle):")
-                            {
+                            } else if (rowHeader == "User losses (Vehicle):") {
                                 player.PersonalLosses += int.Parse(secondColumn);
-                            } else if (rowHeader == "User fratricide (Vehicle):")
-                            {
+                            } else if (rowHeader == "User fratricide (Vehicle):") {
                                 player.PersonalFratricides += int.Parse(secondColumn);
-                            } else if (rowHeader == "Total kills (Vehicle):")
-                            {
+                            } else if (rowHeader == "Total kills (Vehicle):") {
                                 player.UnitKills_Vehicles += int.Parse(secondColumn);
-                            } else
-                            {
+                            } else {
                                 // Unit losses
                                 Match m = lossesRegex.Match(secondColumn);
-                                if(m.Success)
-                                {
+                                if (m.Success) {
                                     string matchItem = m.Groups[1].Value;
 
                                     int a;//, b;
                                     m = statRegex.Match(columns.ElementAt(2).InnerHtml);
-                                    if (m.Success)
-                                    {
+                                    if (m.Success) {
                                         a = int.Parse(m.Groups[1].Value);
                                         //b = int.Parse(m.Groups[2].Value);
 
-                                        switch (matchItem)
-                                        {
+                                        switch (matchItem) {
                                             case "tanks":
                                                 player.UnitLosses_Tanks += a;
                                                 break;
@@ -239,14 +205,11 @@ namespace SBCM
 
                         head = playerStatsTable;
                     }
-                }
-                else if (header.InnerHtml.Equals("Unit Information"))
-                {
+                } else if (header.InnerHtml.Equals("Unit Information")) {
                     // Parse force logistics state
                     HtmlNode head = header;
 
-                    for (int i = 0; i < scenarioForces.Count; i++)
-                    {
+                    for (int i = 0; i < scenarioForces.Count; i++) {
                         // Force name
                         HtmlNode forceNameNode = NextSiblingElement(head);
                         string forceName = forceNameNode.InnerHtml;
@@ -257,40 +220,33 @@ namespace SBCM
                         HtmlNodeCollection rows = forceTable.SelectNodes("tr");
                         int startIndex;
                         int rowDividers = 0;
-                        for (startIndex = 0; startIndex < rows.Count; startIndex++)
-                        {
+                        for (startIndex = 0; startIndex < rows.Count; startIndex++) {
                             HtmlNode row = rows[startIndex];
 
-                            if (row.Elements("td").Count() == 1)
-                            {
+                            if (row.Elements("td").Count() == 1) {
                                 rowDividers++;
-                            }
-                            else if (rowDividers >= 3)
-                            {
+                            } else if (rowDividers >= 3) {
                                 var unitColumns = row.Descendants("td");
 
                                 string unitCallsign = unitColumns.ElementAt(0).InnerHtml;
                                 string unitClass = unitColumns.ElementAt(1).InnerHtml;
                                 string unitType = unitColumns.ElementAt(2).InnerHtml;
 
-                                Unit unit = CAMPAIGN_INITIALIZING ? currentForce.GetUnit(unitCallsign) : null;
-                                if (unit != null)
-                                {
+                                Unit unit = currentForce.GetUnit(unitCallsign);
+                                if (unit != null) {
+                                    // TODO handle this case better
                                     Debug.Assert(
                                         unit.Unit_Class == unitClass && unit.Type == unitType,
                                         $"Unit {unitCallsign}/{unitType}/{unitClass} does not match {unit.Callsign}/{unit.Type}/{unit.Unit_Class}"
                                     );
-                                }
-                                else
-                                {
+                                } else {
                                     unit = new Unit(forceName, unitCallsign, unitType, unitClass);
                                     currentForce.AddUnit(unit);
                                 }
 
                                 //Console.WriteLine($"{unit.Callsign}: {unit.Company} company, {unit.Platoon} platoon, {unit.Section} section, {unit.Team} team - CO: {unit.CO} XO: {unit.XO}");
 
-                                if (CAMPAIGN_INITIALIZING)
-                                {
+                                if (campaignInitializing) {
                                     unit.Strength_Maximum = int.Parse(unitColumns.ElementAt(3).InnerHtml);
                                 }
                                 unit.Strength_Current = int.Parse(unitColumns.ElementAt(4).InnerHtml);
@@ -304,13 +260,12 @@ namespace SBCM
 
                                 int gunAmmoIndex = 11;
                                 GunAmmo[] gunAmmo = unit.GetAllAmmo();
-                                for (int mg = 0; mg < 18; mg++)
-                                {
+                                for (int mg = 0; mg < 18; mg++) {
                                     ParseGunAmmo(
                                         unitColumns,
                                         ref gunAmmoIndex,
                                         ref gunAmmo[mg],
-                                        CAMPAIGN_INITIALIZING
+                                        campaignInitializing
                                     );
                                 }
                             }
@@ -318,16 +273,13 @@ namespace SBCM
 
                         head = forceTable;
                     }
-                }
-                else if (header.InnerHtml.Equals("Events") && !eventsParsed)
-                {
+                } else if (header.InnerHtml.Equals("Events") && !eventsParsed) {
                     // Parse granular damage events
                     HtmlNode eventTable = NextSiblingElement(header);
 
                     var rows = eventTable.Descendants("tr").Skip(2).ToList();
 
-                    foreach (HtmlNode row in rows)
-                    {
+                    foreach (HtmlNode row in rows) {
                         var eventColumns = row.Descendants("td");
 
                         string eventTime = eventColumns.ElementAt(0).InnerHtml;
@@ -376,21 +328,10 @@ namespace SBCM
                 }
             }
 
-            if (CAMPAIGN_INITIALIZING)
-            {
-                foreach (Force f in scenarioForces.Values)
-                {
-                    f.InitializeAmmoReserve(1);
-                }
-            }
-            
-            using (StreamWriter writer = new StreamWriter("units.csv"))
-            {
+            using (StreamWriter writer = new StreamWriter("units.csv")) {
                 writer.WriteLine(Unit.SerializeToCSVColumnHeadings());
-                foreach (Force f in scenarioForces.Values)
-                {
-                    foreach(Unit unit in f.GetUnits())
-                    {
+                foreach (Force f in scenarioForces.Values) {
+                    foreach (Unit unit in f.GetUnits()) {
                         writer.WriteLine(unit.SerializeToCSVRow());
                     }
                 }

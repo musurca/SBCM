@@ -1,13 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace SBCM {
@@ -42,8 +37,8 @@ namespace SBCM {
 
             Rectangle rect = mapPanel.ClientRectangle;
             _mapCenter = new Point(
-                rect.Left + (int)((rect.Right-rect.Left)*0.5), 
-                rect.Top + (int)((rect.Bottom-rect.Top)*0.5)
+                rect.Left + (int)((rect.Right - rect.Left) * 0.5),
+                rect.Top + (int)((rect.Bottom - rect.Top) * 0.5)
             );
             _mapAnchor = new Point(0, 0);
 
@@ -53,12 +48,11 @@ namespace SBCM {
             ReportParser.MergeReport(
                 "B26 Smash & Crush v1.0.0.sce_11_12-20-22_23_07_07.htm",
                 _players,
-                _forces,
-                true
+                _forces
             );
 
-            foreach(string forceName in _forces.Keys ) {
-                forceSelector.Items.Add( forceName );
+            foreach (string forceName in _forces.Keys) {
+                forceSelector.Items.Add(forceName);
             }
             forceSelector.SelectedItem = _forces.Keys.ToList()[0];
         }
@@ -80,7 +74,7 @@ namespace SBCM {
                 foreach (Platoon p in c.Platoons.Values) {
                     if (currentForce.GenerateCallsign(out string platoonCallsign, c.ID, p.ID)) {
                         TreeNode platoonNode = companyNode.Nodes.Add(platoonCallsign);
-                        
+
                         List<Unit> allMembers = new List<Unit>();
                         foreach (Unit u in p.Members) {
                             allMembers.Add(u);
@@ -107,7 +101,7 @@ namespace SBCM {
                         }
 
                         // Team units without a parent section
-                        foreach(Unit u in allMembers) {
+                        foreach (Unit u in allMembers) {
                             string unitID = $"{u.Callsign} ({u.Type})";
                             if (p.CO == u) {
                                 unitID += " (CO)";
@@ -126,16 +120,22 @@ namespace SBCM {
             Graphics g = e.Graphics;
             //g.TranslateTransform(-_mapCenter.X, -_mapCenter.Y);
             g.ScaleTransform(_scale, _scale);
-            g.TranslateTransform((int)(_mapAnchor.X*_scale), (int)(_mapAnchor.Y*_scale));
-            g.DrawImage(_testMap, new Point((int)(-_mapCenter.X*_scale), (int)(-_mapCenter.Y*_scale)));
-            
-            
+            g.TranslateTransform(
+                (int)(_mapAnchor.X * _scale),
+                (int)(_mapAnchor.Y * _scale)
+            );
+            g.DrawImage(
+                _testMap,
+                new Point((int)(-_mapCenter.X * _scale), (int)(-_mapCenter.Y * _scale))
+            );
+
+
             //g.DrawEllipse(Pens.Firebrick, rect);
             //using (Pen pen = new Pen(Color.DarkBlue, 4f)) g.DrawLine(pen, 22, 22, 88, 88);
         }
 
         private void mapPanel_MouseMove(object sender, MouseEventArgs e) {
-            if(_mouseDown) {
+            if (_mouseDown) {
                 Point curLoc = e.Location;
                 _mapAnchor = new Point(
                     _mapAnchor.X + (int)((e.Location.X - _startPoint.X) / _scale),
@@ -149,7 +149,7 @@ namespace SBCM {
 
         private void mapPanel_MouseDown(object sender, MouseEventArgs e) {
             _startPoint = e.Location;
-            _mouseDown = true;            
+            _mouseDown = true;
         }
 
         private void mapPanel_MouseUp(object sender, MouseEventArgs e) {
