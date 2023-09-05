@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -111,14 +112,14 @@ namespace SBCM {
                 && sectionValid && teamValid;
         }
 
-        private bool ExtractCompanyPlatoon(
+        private void ExtractCompanyPlatoon(
             string callsign,
             Regex regex,
             List<string> symbol_order,
-            out string company,
-            out string platoon,
-            out string section,
-            out string team
+            ref string company,
+            ref string platoon,
+            ref string section,
+            ref string team
         ) {
             company = "";
             platoon = "";
@@ -145,11 +146,13 @@ namespace SBCM {
                     }
                 }
 
+                /*
                 if (company != "" && platoon != "") {
                     return true;
                 }
+                */
             }
-            return false;
+            //return false;
         }
 
         public void GetBattalionPosition(
@@ -162,29 +165,32 @@ namespace SBCM {
         ) {
             command = CommandState.NONE;
 
+            team = "";
+            section = "";
+            platoon = "";
+            company = "";
+
             // Is it a team?
-            if (
-                ExtractCompanyPlatoon(
-                    callsign,
-                    _regex_team,
-                    _regex_team_symbol_order,
-                    out company, out platoon,
-                    out section, out team
-                )
-            ) {
+            ExtractCompanyPlatoon(
+                callsign,
+                _regex_team,
+                _regex_team_symbol_order,
+                ref company, ref platoon,
+                ref section, ref team
+            );
+            if(team != "") {
                 return;
             }
 
             // Is it a section or platoon CO/XO?
-            if (
-                ExtractCompanyPlatoon(
-                    callsign,
-                    _regex_section,
-                    _regex_section_symbol_order,
-                    out company, out platoon,
-                    out section, out team
-                )
-            ) {
+            ExtractCompanyPlatoon(
+                callsign,
+                _regex_section,
+                _regex_section_symbol_order,
+                ref company, ref platoon,
+                ref section, ref team
+            );
+            if(section != "") { 
                 if (section == _symbol_platoon_co) {
                     command = CommandState.CO;
                     section = "";
@@ -197,15 +203,14 @@ namespace SBCM {
             }
 
             // Is it a platoon or company CO/XO?
-            if (
-                ExtractCompanyPlatoon(
-                    callsign,
-                    _regex_platoon,
-                    _regex_platoon_symbol_order,
-                    out company, out platoon,
-                    out section, out team
-                )
-            ) {
+            ExtractCompanyPlatoon(
+                callsign,
+                _regex_platoon,
+                _regex_platoon_symbol_order,
+                ref company, ref platoon,
+                ref section, ref team
+            );
+            if(platoon != "") { 
                 if (platoon == _symbol_company_co) {
                     command = CommandState.CO;
                     platoon = "";

@@ -328,6 +328,10 @@ namespace SBCM {
                 }
             }
 
+            foreach(Force f in scenarioForces.Values) {
+                f.EstimatePositions();
+            }
+
             using (StreamWriter writer = new StreamWriter("units.csv")) {
                 writer.WriteLine(Unit.SerializeToCSVColumnHeadings());
                 foreach (Force f in scenarioForces.Values) {

@@ -23,6 +23,17 @@
             DamagedRadio = false;
             DamagedTurret = false;
         }
+
+        public bool IsDamaged() {
+            return Immobilized
+                || CasualtyCommander
+                || CasualtyGunner
+                || CasualtyLoader
+                || CasualtyDriver
+                || DamagedFCS
+                || DamagedRadio
+                || DamagedTurret;
+        }
     }
 }
 

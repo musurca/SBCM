@@ -31,6 +31,12 @@ namespace SBCM {
         public static readonly int SLOT_GRENADE_2 = 17;
         public static readonly int MAX_AMMO_SLOTS = 18;
 
+        public static readonly string CLASS_TANK = "Tank";
+        public static readonly string CLASS_PC = "PC";
+        public static readonly string CLASS_TRUCK = "Truck";
+        public static readonly string CLASS_HELO = "Helicopter";
+        public static readonly string CLASS_PERSONNEL = "personnel";
+
         public static readonly string[] AMMO_SLOT_NAMES = {
             "MAINGUN_1",
             "MAINGUN_2",
@@ -130,7 +136,7 @@ namespace SBCM {
         }
 
         public bool IsOperational() {
-            return Strength_Current > 0 || _damageState.Destroyed;
+            return (Strength_Current > 0) && !_damageState.Destroyed;
         }
 
         public static string SerializeToCSVColumnHeadings() {
