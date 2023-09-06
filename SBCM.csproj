@@ -54,7 +54,21 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CallsignParser.cs" />
+    <Compile Include="Campaign.cs" />
     <Compile Include="DamageState.cs" />
+    <Compile Include="NewFromReport.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="NewFromReport.Designer.cs">
+      <DependentUpon>NewFromReport.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SetCallsignTemplates.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SetCallsignTemplates.Designer.cs">
+      <DependentUpon>SetCallsignTemplates.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ShotEvent.cs" />
     <Compile Include="Force.cs" />
     <Compile Include="GunAmmo.cs" />
     <Compile Include="MainWindow.cs">
@@ -68,8 +82,12 @@
     <Compile Include="ReportParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Unit.cs" />
+    <Compile Include="ViewFuncs.cs" />
     <EmbeddedResource Include="MainWindow.resx">
       <DependentUpon>MainWindow.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="NewFromReport.resx">
+      <DependentUpon>NewFromReport.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -81,6 +99,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="SetCallsignTemplates.resx">
+      <DependentUpon>SetCallsignTemplates.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

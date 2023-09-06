@@ -10,33 +10,33 @@ namespace SBCM {
         static readonly string MARKER_SECTION   = "{section}";
         static readonly string MARKER_TEAM      = "{team}";
 
-        readonly string _company_regex_str;
-        readonly string _platoon_regex_str;
-        readonly string _section_regex_str;
-        readonly string _team_regex_str;
+        public string CompanyRegexStr;
+        public string PlatoonRegexStr;
+        public string SectionRegexStr;
+        public string TeamRegexStr;
 
-        readonly Regex _regex_platoon;
-        readonly List<string> _regex_platoon_symbol_order;
+        public Regex RegexPlatoon;
+        public List<string> RegexPlatoonSymbolOrder;
 
-        readonly Regex _regex_section;
-        readonly List<string> _regex_section_symbol_order;
+        public Regex RegexSection;
+        public List<string> RegexSectionSymbolOrder;
 
-        readonly Regex _regex_team;
-        readonly List<string> _regex_team_symbol_order;
+        public Regex RegexTeam;
+        public List<string> RegexTeamSymbolOrder;
 
-        readonly string _symbol_company_co;
-        readonly string _symbol_company_xo;
-        readonly string _symbol_platoon_co;
-        readonly string _symbol_platoon_xo;
+        public string SymbolCompanyCO;
+        public string SymbolCompanyXO;
+        public string SymbolPlatoonCO;
+        public string SymbolPlatoonXO;
 
-        readonly string _pattern_platoon;
-        readonly string _pattern_section;
-        readonly string _pattern_team;
+        public string PatternPlatoon;
+        public string PatternSection;
+        public string PatternTeam;
 
-        readonly string[] _symbols_company;
-        readonly string[] _symbols_platoon;
-        readonly string[] _symbols_section;
-        readonly string[] _symbols_team;
+        public string[] SymbolsCompanyList;
+        public string[] SymbolsPlatoonList;
+        public string[] SymbolsSectionList;
+        public string[] SymbolsTeamList;
 
         public CallsignParser(
             string pattern_platoon,
@@ -51,28 +51,28 @@ namespace SBCM {
             string symbol_platoon_co,
             string symbol_platoon_xo
         ) {
-            _pattern_platoon = pattern_platoon;
-            _pattern_section = pattern_section;
-            _pattern_team = pattern_team;
+            PatternPlatoon = pattern_platoon;
+            PatternSection = pattern_section;
+            PatternTeam = pattern_team;
 
-            _symbols_company = symbols_company;
-            _symbols_platoon = symbols_platoon;
-            _symbols_section = symbols_section;
-            _symbols_team = symbols_team;
+            SymbolsCompanyList = symbols_company;
+            SymbolsPlatoonList = symbols_platoon;
+            SymbolsSectionList = symbols_section;
+            SymbolsTeamList = symbols_team;
 
-            _company_regex_str = BuildRegexFromSymbolList(symbols_company);
-            _platoon_regex_str = BuildRegexFromSymbolList(symbols_platoon, symbol_company_co, symbol_company_xo);
-            _section_regex_str = BuildRegexFromSymbolList(symbols_section, symbol_platoon_co, symbol_platoon_xo);
-            _team_regex_str = BuildRegexFromSymbolList(symbols_team);
+            CompanyRegexStr = BuildRegexFromSymbolList(symbols_company);
+            PlatoonRegexStr = BuildRegexFromSymbolList(symbols_platoon, symbol_company_co, symbol_company_xo);
+            SectionRegexStr = BuildRegexFromSymbolList(symbols_section, symbol_platoon_co, symbol_platoon_xo);
+            TeamRegexStr = BuildRegexFromSymbolList(symbols_team);
 
-            _regex_platoon = new Regex(SwapSymbols(pattern_platoon, out _regex_platoon_symbol_order));
-            _regex_section = new Regex(SwapSymbols(pattern_section, out _regex_section_symbol_order));
-            _regex_team = new Regex(SwapSymbols(pattern_team, out _regex_team_symbol_order));
+            RegexPlatoon = new Regex(SwapSymbols(pattern_platoon, out RegexPlatoonSymbolOrder));
+            RegexSection = new Regex(SwapSymbols(pattern_section, out RegexSectionSymbolOrder));
+            RegexTeam = new Regex(SwapSymbols(pattern_team, out RegexTeamSymbolOrder));
 
-            _symbol_company_co = symbol_company_co;
-            _symbol_company_xo = symbol_company_xo;
-            _symbol_platoon_co = symbol_platoon_co;
-            _symbol_platoon_xo = symbol_platoon_xo;
+            SymbolCompanyCO = symbol_company_co;
+            SymbolCompanyXO = symbol_company_xo;
+            SymbolPlatoonCO = symbol_platoon_co;
+            SymbolPlatoonXO = symbol_platoon_xo;
         }
 
         public bool BuildCallsign(
@@ -86,29 +86,29 @@ namespace SBCM {
             bool teamValid = true;
             bool sectionValid = true;
             if (team != "") {
-                callsign = _pattern_team;
+                callsign = PatternTeam;
                 callsign = callsign.Replace(MARKER_TEAM, team);
-                teamValid = _symbols_team.Contains(team);
+                teamValid = SymbolsTeamList.Contains(team);
             }
 
             if (section != "") {
                 if (callsign == "") {
-                    callsign = _pattern_section;
+                    callsign = PatternSection;
                 }
 
                 callsign = callsign.Replace(MARKER_SECTION, section);
-                sectionValid = _symbols_section.Contains(section);
+                sectionValid = SymbolsSectionList.Contains(section);
             } else {
                 if (callsign == "") {
-                    callsign = _pattern_platoon;
+                    callsign = PatternPlatoon;
                 }
             }
 
             callsign = callsign.Replace(MARKER_PLATOON, platoon)
                 .Replace(MARKER_COMPANY, company);
 
-            return _symbols_platoon.Contains(platoon)
-                && _symbols_company.Contains(company)
+            return SymbolsPlatoonList.Contains(platoon)
+                && SymbolsCompanyList.Contains(company)
                 && sectionValid && teamValid;
         }
 
@@ -145,14 +145,7 @@ namespace SBCM {
                         team = g.Value;
                     }
                 }
-
-                /*
-                if (company != "" && platoon != "") {
-                    return true;
-                }
-                */
             }
-            //return false;
         }
 
         public void GetBattalionPosition(
@@ -173,8 +166,8 @@ namespace SBCM {
             // Is it a team?
             ExtractCompanyPlatoon(
                 callsign,
-                _regex_team,
-                _regex_team_symbol_order,
+                RegexTeam,
+                RegexTeamSymbolOrder,
                 ref company, ref platoon,
                 ref section, ref team
             );
@@ -185,16 +178,16 @@ namespace SBCM {
             // Is it a section or platoon CO/XO?
             ExtractCompanyPlatoon(
                 callsign,
-                _regex_section,
-                _regex_section_symbol_order,
+                RegexSection,
+                RegexSectionSymbolOrder,
                 ref company, ref platoon,
                 ref section, ref team
             );
             if(section != "") { 
-                if (section == _symbol_platoon_co) {
+                if (section == SymbolPlatoonCO) {
                     command = CommandState.CO;
                     section = "";
-                } else if (section == _symbol_platoon_xo) {
+                } else if (section == SymbolPlatoonXO) {
                     command = CommandState.XO;
                     section = "";
                 }
@@ -205,16 +198,16 @@ namespace SBCM {
             // Is it a platoon or company CO/XO?
             ExtractCompanyPlatoon(
                 callsign,
-                _regex_platoon,
-                _regex_platoon_symbol_order,
+                RegexPlatoon,
+                RegexPlatoonSymbolOrder,
                 ref company, ref platoon,
                 ref section, ref team
             );
             if(platoon != "") { 
-                if (platoon == _symbol_company_co) {
+                if (platoon == SymbolCompanyCO) {
                     command = CommandState.CO;
                     platoon = "";
-                } else if (platoon == _symbol_company_xo) {
+                } else if (platoon == SymbolCompanyXO) {
                     command = CommandState.XO;
                     platoon = "";
                 }
@@ -280,10 +273,10 @@ namespace SBCM {
 
             // Build the final regex
             return output
-                .Replace(MARKER_COMPANY, _company_regex_str)
-                .Replace(MARKER_PLATOON, _platoon_regex_str)
-                .Replace(MARKER_SECTION, _section_regex_str)
-                .Replace(MARKER_TEAM, _team_regex_str)
+                .Replace(MARKER_COMPANY, CompanyRegexStr)
+                .Replace(MARKER_PLATOON, PlatoonRegexStr)
+                .Replace(MARKER_SECTION, SectionRegexStr)
+                .Replace(MARKER_TEAM, TeamRegexStr)
             ;
         }
     }

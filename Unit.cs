@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Reflection;
 
 namespace SBCM {
     public enum CommandState {
@@ -83,9 +81,9 @@ namespace SBCM {
         public int UTM_X { get; set; }
         public int UTM_Y { get; set; }
 
-        public GunAmmo[] _ammo;
+        public GunAmmo[] AllAmmo { get; set; }
 
-        public DamageState _damageState;
+        public DamageState Damage { get; set; }
 
         public Unit(string force, string callsign, string type, string unit_class) {
             Force = force;
@@ -111,20 +109,20 @@ namespace SBCM {
 
             UTM_X = UTM_Y = -1; // UNUSED FOR THE MOMENT
 
-            _ammo = new GunAmmo[MAX_AMMO_SLOTS];
-            _damageState = new DamageState();
+            AllAmmo = new GunAmmo[MAX_AMMO_SLOTS];
+            Damage = new DamageState();
         }
 
         public GunAmmo[] GetAllAmmo() {
-            return _ammo;
+            return AllAmmo;
         }
 
         public GunAmmo GetAmmo(int index) {
-            return _ammo[index];
+            return AllAmmo[index];
         }
 
         public DamageState GetDamageState() {
-            return _damageState;
+            return Damage;
         }
 
         public void ClearHierarchy() {
@@ -136,7 +134,11 @@ namespace SBCM {
         }
 
         public bool IsOperational() {
-            return (Strength_Current > 0) && !_damageState.Destroyed;
+            return (Strength_Current > 0) && !Damage.Destroyed;
+        }
+
+        public int GetVehicleKills() {
+            return Kills_Tanks + Kills_Trucks + Kills_PCs + Kills_Helos + Kills_Boats;
         }
 
         public static string SerializeToCSVColumnHeadings() {
@@ -172,11 +174,11 @@ namespace SBCM {
                 Force, Callsign, Type, Unit_Class, Strength_Current, Strength_Maximum,
                 Company, Platoon, Section, Team, Command,
                 UTM_X, UTM_Y, Kills_Tanks, Kills_PCs, Kills_Helos, Kills_Trucks, Kills_Personnel,
-                _damageState.Destroyed, _damageState.Immobilized, _damageState.CasualtyCommander,
-                _damageState.CasualtyGunner, _damageState.CasualtyLoader, _damageState.CasualtyDriver,
-                _damageState.DamagedFCS, _damageState.DamagedRadio, _damageState.DamagedTurret
+                Damage.Destroyed, Damage.Immobilized, Damage.CasualtyCommander,
+                Damage.CasualtyGunner, Damage.CasualtyLoader, Damage.CasualtyDriver,
+                Damage.DamagedFCS, Damage.DamagedRadio, Damage.DamagedTurret
             };
-            foreach (GunAmmo ammo in _ammo) {
+            foreach (GunAmmo ammo in AllAmmo) {
                 attr.Add(ammo.Type);
                 if (ammo.Type != "") {
                     attr.Add(ammo.Amount);

@@ -63,7 +63,6 @@ namespace SBCM {
 
         public static bool MergeReport(
             string filename,
-            Dictionary<string, Player> scenarioPlayers,
             Dictionary<string, Force> scenarioForces
         ) {
             var htmlDoc = new HtmlDocument();
@@ -111,9 +110,11 @@ namespace SBCM {
                 var forceNameColumn = forceRowNode.Elements("td").ElementAt(0);
                 string forceName = forceNameColumn.InnerHtml;
 
-                Force newForce = new Force(forceName);
-                newForce.SetCallsignTemplate(callsignParser);
-                scenarioForces.Add(forceName, newForce);
+                if (!scenarioForces.ContainsKey(forceName)) {
+                    Force newForce = new Force(forceName);
+                    //newForce.CallsignTemplate = callsignParser;
+                    scenarioForces.Add(forceName, newForce);
+                }
             }
 
             // Parse force & event information
@@ -130,15 +131,14 @@ namespace SBCM {
                     for (int i = 0; i < numPlayers; i++) {
                         HtmlNode playerForceNode = NextSiblingElement(head);
                         string playerForceString = playerForceNode.InnerHtml;
-                        string playerForce = GetStringWithinEndParentheses(playerForceString);
-                        string playerName = playerForceString.Replace(" (" + playerForce + ")", "");
+                        string playerForceName = GetStringWithinEndParentheses(playerForceString);
+                        string playerName = playerForceString.Replace(" (" + playerForceName + ")", "");
 
-                        Player player;
-                        if (scenarioPlayers.ContainsKey(playerName)) {
-                            player = scenarioPlayers[playerName];
-                        } else {
+                        Force playerForce = scenarioForces[playerForceName];
+                        Player player = playerForce.FindPlayer(playerName);
+                        if (player == null) {
                             player = new Player(playerName);
-                            scenarioPlayers.Add(playerName, player);
+                            playerForce.AddPlayer(player);
                         }
 
                         HtmlNode playerStatsTable = NextSiblingElement(playerForceNode);
@@ -298,6 +298,8 @@ namespace SBCM {
                         int targetX = int.Parse(eventColumns.ElementAt(8).InnerHtml);
                         int targetY = int.Parse(eventColumns.ElementAt(9).InnerHtml);
 
+                        int distance = int.Parse(eventColumns.ElementAt(10).InnerHtml);
+
                         Force sForce = scenarioForces[shooterForce];
                         Force tForce = scenarioForces[targetForce];
 
@@ -313,8 +315,12 @@ namespace SBCM {
 
                         // Set last-known damage state of the unit
                         DamageState state = target.GetDamageState();
-                        state.Destroyed = state.Destroyed || (eventColumns.ElementAt(12).InnerHtml == "X") || (target.Strength_Current == 0);
-                        state.Immobilized = state.Immobilized || eventColumns.ElementAt(13).InnerHtml == "X";
+
+                        bool newlyDestroyed = eventColumns.ElementAt(12).InnerHtml == "X";
+                        bool newlyImmobilized = eventColumns.ElementAt(13).InnerHtml == "X";
+
+                        state.Destroyed = state.Destroyed || newlyDestroyed || (target.Strength_Current == 0);
+                        state.Immobilized = state.Immobilized || newlyImmobilized;
                         state.CasualtyCommander = state.CasualtyCommander || eventColumns.ElementAt(14).InnerHtml == "X";
                         state.CasualtyGunner = state.CasualtyGunner || eventColumns.ElementAt(15).InnerHtml == "X";
                         state.CasualtyLoader = state.CasualtyLoader || eventColumns.ElementAt(16).InnerHtml == "X";
@@ -322,6 +328,38 @@ namespace SBCM {
                         state.DamagedFCS = state.DamagedFCS || eventColumns.ElementAt(18).InnerHtml == "X";
                         state.DamagedRadio = state.DamagedRadio || eventColumns.ElementAt(19).InnerHtml == "X";
                         state.DamagedTurret = state.DamagedTurret || eventColumns.ElementAt(20).InnerHtml == "X";
+
+                        if(newlyDestroyed || newlyImmobilized) {
+                            string eventAction = newlyDestroyed ? "killed" : "immobilized";
+                            string targetDesc = target.Unit_Class != Unit.CLASS_PERSONNEL
+                                ? $"a {tForce.Name} {target.Unit_Class}"
+                                : $"{tForce.Name} personnel";
+                            string shooterDesc = shooter.Unit_Class != Unit.CLASS_PERSONNEL
+                                ? $"a {sForce.Name} {shooter.Unit_Class}"
+                                : $"{sForce.Name} personnel";
+
+                            ShotEvent shooterEvent = new ShotEvent();
+                            shooterEvent.Time = eventTime;
+                            shooterEvent.Unit_Callsign = shooterCallsign;
+                            shooterEvent.Distance = distance;
+                            shooterEvent.From_UTM_X = shooterX;
+                            shooterEvent.From_UTM_Y = shooterY;
+                            shooterEvent.To_UTM_X = targetX;
+                            shooterEvent.To_UTM_Y = targetY;
+                            shooterEvent.EventText = $"{shooterCallsign} {eventAction} {targetDesc}";
+                            sForce.AddEvent(shooterEvent);
+
+                            ShotEvent targetEvent = new ShotEvent();
+                            targetEvent.Time = eventTime;
+                            targetEvent.Unit_Callsign = targetCallsign;
+                            targetEvent.Distance = distance;
+                            targetEvent.From_UTM_X = shooterX;
+                            targetEvent.From_UTM_Y = shooterY;
+                            targetEvent.To_UTM_X = targetX;
+                            targetEvent.To_UTM_Y = targetY;
+                            targetEvent.EventText = $"{targetCallsign} was {eventAction} by {shooterDesc}";
+                            tForce.AddEvent(targetEvent);
+                        }
                     }
 
                     eventsParsed = true;
@@ -335,7 +373,7 @@ namespace SBCM {
             using (StreamWriter writer = new StreamWriter("units.csv")) {
                 writer.WriteLine(Unit.SerializeToCSVColumnHeadings());
                 foreach (Force f in scenarioForces.Values) {
-                    foreach (Unit unit in f.GetUnits()) {
+                    foreach (Unit unit in f.GetUnitList()) {
                         writer.WriteLine(unit.SerializeToCSVRow());
                     }
                 }

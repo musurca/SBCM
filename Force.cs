@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace SBCM {
     public class Team {
@@ -331,20 +334,67 @@ namespace SBCM {
     }
 
     public class Force {
-        public string Name { get; }
-        public Battalion Hierarchy { get; set; }
+        public string Name { get; set; }
 
-        Dictionary<string, Unit> _units;
+        [JsonIgnore]
+        public Battalion Hierarchy { get; set; } = new Battalion();
+        public List<Player> Players { get; set; } = new List<Player>();
 
-        CallsignParser _callsignTemplate;
+        private Dictionary<string, Unit> _units;
+        public Dictionary<string, Unit> Units { 
+            get {
+                return _units;
+            }
+
+            set {
+                _units = value;
+                RebuildHierarchy();
+            } 
+        }
+        public List<ShotEvent> Events { get; set; } = new List<ShotEvent>();
+
+        private CallsignParser _callsignTemplate;
 
         public Force(string name) {
             Name = name;
-
-            _units = new Dictionary<string, Unit>();
+            Units = new Dictionary<string, Unit>();
             _callsignTemplate = null;
+        }
 
-            Hierarchy = new Battalion();
+        public Player FindPlayer(string name) {
+            foreach(Player p in Players) {
+                if (p.Name == name) {
+                    return p;
+                }
+            }
+            return null;
+        }
+
+        private void RebuildHierarchy() {
+            if (Units.Count > 0) {
+                foreach (Unit u in Units.Values) {
+                    ParseUnitHierarchy(u);
+                }
+
+                RebuildBattalion();
+            }
+        }
+
+        public void SetCallsignTemplate(CallsignParser parser) {
+            _callsignTemplate = parser;
+
+            RebuildHierarchy();
+        }
+
+        public void AddPlayer(Player p) { Players.Add(p); }
+        public List<Player> GetPlayers() { return Players; }
+
+        public void AddEvent(ShotEvent evt) {
+            Events.Add(evt);
+        }
+
+        public List<ShotEvent> GetEvents() {
+            return Events;
         }
 
         public bool GenerateCallsign(
@@ -388,30 +438,18 @@ namespace SBCM {
         private void RebuildBattalion() {
             Hierarchy.Clear();
 
-            foreach (Unit u in _units.Values) {
+            foreach (Unit u in Units.Values) {
                 AddUnitToBattalion(u);
             }
         }
 
-        public void SetCallsignTemplate(CallsignParser parser) {
-            _callsignTemplate = parser;
-
-            if (_units.Count > 0) {
-                foreach (Unit u in _units.Values) {
-                    ParseUnitHierarchy(u);
-                }
-
-                RebuildBattalion();
-            }
-        }
-
-        public List<Unit> GetUnits() {
-            return _units.Values.ToList();
+        public List<Unit> GetUnitList() {
+            return Units.Values.ToList();
         }
 
         public Unit GetUnit(string callsign) {
-            if (_units.ContainsKey(callsign)) {
-                return _units[callsign];
+            if (Units.ContainsKey(callsign)) {
+                return Units[callsign];
             }
 
             return null;
@@ -438,14 +476,14 @@ namespace SBCM {
 
         public void AddUnit(Unit u) {
             ParseUnitHierarchy(u);
-            _units.Add(u.Callsign, u);
+            Units.Add(u.Callsign, u);
             AddUnitToBattalion(u);
         }
 
         public Dictionary<string, int> GetAmmoState() {
             Dictionary<string, int> ammoState = new Dictionary<string, int>();
 
-            List<Unit> units = GetUnits();
+            List<Unit> units = GetUnitList();
             foreach (Unit u in units) {
                 GunAmmo[] ammos = u.GetAllAmmo();
                 foreach (GunAmmo ammo in ammos) {
@@ -465,7 +503,7 @@ namespace SBCM {
         public Dictionary<string, int> GetAmmoCapacity() {
             Dictionary<string, int> ammoState = new Dictionary<string, int>();
 
-            List<Unit> units = GetUnits();
+            List<Unit> units = GetUnitList();
             foreach (Unit u in units) {
                 GunAmmo[] ammos = u.GetAllAmmo();
                 foreach (GunAmmo ammo in ammos) {

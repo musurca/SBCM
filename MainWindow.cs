@@ -4,22 +4,27 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 
 namespace SBCM {
     public partial class MainWindow : Form {
         float _scale;
-        Bitmap _testMap;
+        Bitmap _mapImage;
         Point _mapAnchor;
         Point _mapCenter;
         bool _mouseDown;
 
         Point _startPoint;
 
-        Dictionary<string, Player> _players;
+        string _currentCampaignFileName;
+
         Dictionary<string, Force> _forces;
 
         Dictionary<string, object> _oobToUnit;
+        Campaign _campaign;
+
+        // TEST URL = https://i.imgur.com/aqIr9Ol.png
 
         public MainWindow() {
             InitializeComponent();
@@ -34,9 +39,14 @@ namespace SBCM {
                 new object[] { true }
             );
 
-            _testMap = new Bitmap("map.png");
+            _mapImage = null;//new Bitmap("map.png");
             _scale = 1.0f;
             _mouseDown = false;
+
+            campaignName.Text = "";
+            turnCounter.Text = "";
+
+            _currentCampaignFileName = "";
 
             Rectangle rect = mapPanel.ClientRectangle;
             _mapCenter = new Point(
@@ -46,27 +56,30 @@ namespace SBCM {
             _mapAnchor = new Point(-_mapCenter.X, -_mapCenter.Y);
 
             // Load Report
-            _players = new Dictionary<string, Player>();
-            _forces = new Dictionary<string, Force>();
-            ReportParser.MergeReport(
-                "B26 Smash & Crush v1.0.0.sce_11_12-20-22_23_07_07.htm",
-                _players,
-                _forces
-            );
+            //_forces = new Dictionary<string, Force>();
+            //ReportParser.MergeReport(
+            //    "B26 Smash & Crush v1.0.0.sce_11_12-20-22_23_07_07.htm",
+            //    _forces
+            //);
 
             _oobToUnit = new Dictionary<string, object>();
             ammoGrid.ClearSelection();
 
             statusDestroyed.Visible = false;
             HideVehicleDamage();
+            callsignLabel.Text = "";
+            typeLabel.Text = "";
+            companyLabel.Text = "";
+            platoonLabel.Text = "";
+            sectionLabel.Text = "";
+            teamLabel.Text = "";
 
-            //ammoGrid.RowsDefaultCellStyle.SelectionBackColor = Color.;
-            //ammoGrid.RowsDefaultCellStyle.SelectionForeColor = Color.Empty;
+            labelCompanyHeader.Visible = false;
+            labelPlatoonHeader.Visible = false;
+            labelSectionHeader.Visible = false;
+            labelTeamHeader.Visible = false;
 
-            foreach (string forceName in _forces.Keys) {
-                forceSelector.Items.Add(forceName);
-            }
-            forceSelector.SelectedItem = _forces.Keys.ToList()[0];
+            mapShowSelector.SelectedItem = mapShowSelector.Items[0];
         }
 
         private void HideVehicleDamage() {
@@ -94,11 +107,6 @@ namespace SBCM {
             statusDriver.Visible = true;
         }
 
-        private TreeNode AddOOBNode(TreeNodeCollection nodes, string nodeName, object unit) {
-            _oobToUnit.Add(nodeName, unit);
-            return nodes.Add(nodeName);
-        }
-
         private object SelectUnitFromOOB() {
             string selected = oobTree.SelectedNode.Text;
             if(_oobToUnit.ContainsKey(selected)) {
@@ -108,92 +116,13 @@ namespace SBCM {
         }
 
         private void PopulateOOBTree() {
-            Force currentForce = _forces[(string)forceSelector.SelectedItem];
-            Battalion b = currentForce.Hierarchy;
-            oobTree.BeginUpdate();
-            oobTree.Nodes.Clear();
-            _oobToUnit.Clear();
-            foreach (Company c in b.Companies.Values) {
-                TreeNode companyNode = AddOOBNode(oobTree.Nodes, c.ID, c);
-                if (c.CO != null) {
-                    AddOOBNode(companyNode.Nodes, $"{c.CO.Callsign} ({c.CO.Type})", c.CO);
-                }
-                if (c.XO != null) {
-                    AddOOBNode(companyNode.Nodes, $"{c.XO.Callsign} ({c.XO.Type})", c.XO);
-                }
-
-                foreach (Platoon p in c.Platoons.Values) {
-                    if (currentForce.GenerateCallsign(out string platoonCallsign, c.ID, p.ID)) {
-                        TreeNode platoonNode = AddOOBNode(companyNode.Nodes, platoonCallsign, p);
-
-                        List<Unit> allMembers = new List<Unit>();
-                        foreach (Unit u in p.Members) {
-                            allMembers.Add(u);
-                        }
-
-                        foreach (Unit u in p.Members) {
-                            if (u.Team == "") {
-                                string unitID = $"{u.Callsign} ({u.Type})";
-                                if (p.CO == u) {
-                                    unitID += " (CO)";
-                                } else if (p.XO == u) {
-                                    unitID += " (XO)";
-                                }
-                                TreeNode sectionNode = AddOOBNode(platoonNode.Nodes, unitID, u);
-                                if(!u.IsOperational()) {
-                                    sectionNode.ForeColor = Color.LightGray;
-                                } else if(
-                                    u.Unit_Class != Unit.CLASS_PERSONNEL 
-                                    && u.GetDamageState().IsDamaged()
-                                ) {
-                                    sectionNode.ForeColor = Color.DarkGoldenrod;
-                                }
-                                foreach (Unit sub_u in p.Members) {
-                                    if (sub_u.Team != "" && sub_u.Section == u.Section) {
-                                        unitID = $"{sub_u.Callsign} ({sub_u.Type})";
-                                        TreeNode node = AddOOBNode(sectionNode.Nodes, unitID, sub_u);
-                                        if (!u.IsOperational()) {
-                                            node.ForeColor = Color.LightGray;
-                                        } else if (
-                                            u.Unit_Class != Unit.CLASS_PERSONNEL 
-                                            && u.GetDamageState().IsDamaged()
-                                        ) {
-                                            node.ForeColor = Color.DarkGoldenrod;
-                                        }
-                                        allMembers.Remove(sub_u);
-                                    }
-                                }
-                                allMembers.Remove(u);
-                            }
-                        }
-
-                        // Team units without a parent section
-                        foreach (Unit u in allMembers) {
-                            string unitID = $"{u.Callsign} ({u.Type})";
-                            if (p.CO == u) {
-                                unitID += " (CO)";
-                            } else if (p.XO == u) {
-                                unitID += " (XO)";
-                            }
-                            TreeNode node  = AddOOBNode(platoonNode.Nodes, unitID, u);
-                            if (!u.IsOperational()) {
-                                node.ForeColor = Color.LightGray;
-                            } else if (
-                                u.Unit_Class != Unit.CLASS_PERSONNEL 
-                                && u.GetDamageState().IsDamaged()
-                            ) {
-                                node.ForeColor = Color.DarkGoldenrod;
-                            }
-                        }
-                    }
-                }
+            if (_forces != null) {
+                Force currentForce = _forces[(string)forceSelector.SelectedItem];
+                _oobToUnit = ViewFuncs.PopulateTreeViewWithOOB(oobTree, currentForce);
             }
-            oobTree.EndUpdate();
         }
 
         private void panel1_Paint(object sender, PaintEventArgs e) {
-            Force currentForce = _forces[(string)forceSelector.SelectedItem];
-
             Graphics g = e.Graphics;
             g.SmoothingMode = SmoothingMode.AntiAlias;
 
@@ -201,31 +130,38 @@ namespace SBCM {
                 g.FillRectangle(blackBrush, mapPanel.ClientRectangle);
             }
 
-            // Center map, scale by zoom, then move to anchor
-            g.TranslateTransform(_mapCenter.X, _mapCenter.Y);
-            g.ScaleTransform(_scale, _scale);
-            g.TranslateTransform(_mapAnchor.X, _mapAnchor.Y);
-            g.DrawImage(_testMap, 0, 0);
+            if (_mapImage != null) {
+                Force currentForce = _forces[(string)forceSelector.SelectedItem];
 
-            SolidBrush blockBrush = new SolidBrush(Color.DarkBlue);
-            SolidBrush fontBrush = new SolidBrush(Color.White);
-            foreach (Company c in currentForce.Hierarchy.Companies.Values) {
-                foreach (Platoon p in c.Platoons.Values) {
-                    if (p.UTM_X != -1 && p.UTM_Y != -1) {
-                        g.FillRectangle(
-                            blockBrush,
-                                
-                                p.UTM_X - 10, p.UTM_Y / 10 - 10,
-                                20, 20
-                                
-                        );
-                        currentForce.GenerateCallsign(out string callsign, c.ID, p.ID);
-                        g.DrawString(callsign, SystemFonts.DefaultFont, fontBrush, p.UTM_X-10, p.UTM_Y / 10-10);
+                // Center map, scale by zoom, then move to anchor
+                g.TranslateTransform(_mapCenter.X, _mapCenter.Y);
+                g.ScaleTransform(_scale, _scale);
+                g.TranslateTransform(_mapAnchor.X, _mapAnchor.Y);
+                using (Pen whitePen = new Pen(Color.White)) {
+                    g.DrawRectangle(whitePen, -5, -5, _mapImage.Width + 10, _mapImage.Height + 10);
+                }
+                g.DrawImage(_mapImage, 0, 0);
+
+                SolidBrush blockBrush = new SolidBrush(Color.DarkBlue);
+                SolidBrush fontBrush = new SolidBrush(Color.White);
+                foreach (Company c in currentForce.Hierarchy.Companies.Values) {
+                    foreach (Platoon p in c.Platoons.Values) {
+                        if (p.UTM_X != -1 && p.UTM_Y != -1) {
+                            g.FillRectangle(
+                                blockBrush,
+
+                                    p.UTM_X - 10, p.UTM_Y / 10 - 10,
+                                    20, 20
+
+                            );
+                            currentForce.GenerateCallsign(out string callsign, c.ID, p.ID);
+                            g.DrawString(callsign, SystemFonts.DefaultFont, fontBrush, p.UTM_X - 10, p.UTM_Y / 10 - 10);
+                        }
                     }
                 }
+                blockBrush.Dispose();
+                fontBrush.Dispose();
             }
-            blockBrush.Dispose();
-            fontBrush.Dispose();
         }
 
         private void mapPanel_MouseMove(object sender, MouseEventArgs e) {
@@ -242,12 +178,16 @@ namespace SBCM {
         }
 
         private void mapPanel_MouseDown(object sender, MouseEventArgs e) {
-            _startPoint = e.Location;
-            _mouseDown = true;
+            if (e.Button == MouseButtons.Right) {
+                _startPoint = e.Location;
+                _mouseDown = true;
+            }
         }
 
         private void mapPanel_MouseUp(object sender, MouseEventArgs e) {
-            _mouseDown = false;
+            if (e.Button == MouseButtons.Right) {
+                _mouseDown = false;
+            }
         }
 
         private void mapPanel_Scroll(object sender, MouseEventArgs e) {
@@ -256,24 +196,81 @@ namespace SBCM {
         }
 
         private void forceSelector_SelectedIndexChanged(object sender, EventArgs e) {
+            Force currentForce = _forces[(string)forceSelector.SelectedItem];
+
+            eventGrid.Rows.Clear();
+            playerGrid.Rows.Clear();
+            
+            // Populate force OOB
             PopulateOOBTree();
+
+            // Populate units
+            foreach(ShotEvent evt in currentForce?.GetEvents()) {
+                eventGrid.Rows.Add(evt.Time, evt.EventText);
+            }
+            eventGrid.ClearSelection();
+
+            // Populate players
+            foreach (Player player in currentForce?.GetPlayers()) {
+                playerGrid.Rows.Add(
+                    player.Name,
+                    player.GetHitPercentage(),
+                    player.GetPersonalKD(), 
+                    player.GetUnitKD(),
+                    player.PersonalKills,
+                    player.PersonalLosses,
+                    player.PersonalFratricides,
+                    player.UnitKills_Vehicles,
+                    player.GetUnitLossesVehicle(),
+                    player.UnitLosses_Personnel
+                );
+            }
+            playerGrid.ClearSelection();
+
             mapPanel.Invalidate();
         }
 
         private void newToolStripMenuItem_Click(object sender, EventArgs e) {
+            NewFromReport newFromReport = new NewFromReport();
+            if (newFromReport.ShowDialog() == DialogResult.OK) {
+                _campaign = newFromReport.NewCampaign;
 
+                campaignName.Text = _campaign.Name;
+                _mapImage = _campaign.MapImage.GetBitmap();
+
+                Turn curTurn = _campaign.GetLastTurn();
+                turnCounter.Text = curTurn.Index == 0 
+                    ? "Setup Phase" 
+                    : $"Turn {curTurn.Index}";
+
+                _forces = curTurn.Forces;
+
+                foreach (string forceName in _forces.Keys) {
+                    forceSelector.Items.Add(forceName);
+                }
+                forceSelector.SelectedItem = _forces.Keys.ToList()[0];
+
+                editCallsignTemplateToolStripMenuItem.Enabled = true;
+                updateToolStripMenuItem.Enabled = true;
+                campaignStateToolStripMenuItem.Enabled = true;
+                unitsToCSVToolStripMenuItem.Enabled = true;
+                saveAsToolStripMenuItem.Enabled = true;
+                saveToolStripMenuItem.Enabled = true;
+            }
+            newFromReport.Dispose();
         }
 
         private void nextTurnFromReportToolStripMenuItem_Click(object sender, EventArgs e) {
 
         }
 
-
         private string getPlural(int num) {
             return num == 1 ? "" : "s";
         }
 
         private void oobTree_AfterSelect(object sender, TreeViewEventArgs e) {
+            if(_forces == null) { return;  }
+
             Force currentForce = _forces[(string)forceSelector.SelectedItem];
 
             object obj = SelectUnitFromOOB();
@@ -292,6 +289,13 @@ namespace SBCM {
                     platoonLabel.Text = u.Platoon;
                     sectionLabel.Text = u.Section;
                     teamLabel.Text = u.Team;
+
+                    labelCompanyHeader.Visible = u.Company != "";
+                    labelPlatoonHeader.Visible = u.Platoon != "";
+                    labelSectionHeader.Visible = u.Section != "";
+                    labelTeamHeader.Visible = u.Team != "";
+
+                    labelKillCount.Text = $"{u.GetVehicleKills()} / {u.Kills_Personnel}";
 
                     utmXBox.Text = u.UTM_X.ToString();
                     utmYBox.Text = u.UTM_Y.ToString();
@@ -319,7 +323,6 @@ namespace SBCM {
                     }
 
                     // Damage
-
                     if (destroyed) {
                         HideVehicleDamage();
                         statusDestroyed.Visible = true;
@@ -355,6 +358,7 @@ namespace SBCM {
                         }
                     }
                 } else {
+                    labelCompanyHeader.Visible = true;
                     statusDestroyed.Visible = false;
                     HideVehicleDamage();
                     statusStrength.Visible = false;
@@ -373,6 +377,10 @@ namespace SBCM {
                         sectionLabel.Text = "";
                         teamLabel.Text = "";
 
+                        labelPlatoonHeader.Visible = false;
+                        labelSectionHeader.Visible = false;
+                        labelTeamHeader.Visible = false;
+
                         utmXBox.Text = "";
                         utmYBox.Text = "";
                     } else { 
@@ -389,6 +397,10 @@ namespace SBCM {
                         sectionLabel.Text = "";
                         teamLabel.Text = "";
 
+                        labelPlatoonHeader.Visible = true;
+                        labelSectionHeader.Visible = false;
+                        labelTeamHeader.Visible = false;
+
                         utmXBox.Text = p.UTM_X.ToString();
                         utmYBox.Text = p.UTM_Y.ToString();
                     }
@@ -402,7 +414,13 @@ namespace SBCM {
                     int vehImmobilized = 0;
                     int vehDamaged = 0;
 
+                    int killsVeh = 0;
+                    int killsPers = 0;
+
                     foreach (Unit u in members) {
+                        killsVeh += u.GetVehicleKills();
+                        killsPers += u.Kills_Personnel;
+
                         bool destroyed = !u.IsOperational();
 
                         DamageState dam = u.GetDamageState();
@@ -442,6 +460,8 @@ namespace SBCM {
                         }
                     }
 
+                    labelKillCount.Text = $"{killsVeh} / {killsPers}";
+
                     string vehiclesStrength = totalVehs > 0 ? $"{vehStrength} / {totalVehs} vehicle{getPlural(totalVehs)}\n" : "\n";
                     string personnelStrength = totalPers > 0 ? $"{persStrength} / {totalPers} personnel\n" : "\n";
                     string vehiclesImmobilized = vehImmobilized > 0 ? $"{vehImmobilized} vehicle{getPlural(vehImmobilized)} immobilized\n" : "\n";
@@ -476,13 +496,56 @@ namespace SBCM {
                 teamLabel.Text = "";
 
                 utmXBox.Text = utmYBox.Text = "";
+
+                labelCompanyHeader.Visible = false;
+                labelPlatoonHeader.Visible = false;
+                labelSectionHeader.Visible = false;
+                labelTeamHeader.Visible = false;
             }
 
             ammoGrid.ClearSelection();
+            eventGrid.ClearSelection();
         }
 
         private void ammoGrid_CellContentClick(object sender, DataGridViewCellEventArgs e) {
             ammoGrid.ClearSelection();
+        }
+
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e) {
+            Close();
+        }
+
+        private void mapShowSelector_SelectedIndexChanged(object sender, EventArgs e) {
+            mapPanel.Invalidate();
+        }
+
+        private void MainWindow_Load(object sender, EventArgs e) {
+
+        }
+
+        private void editCallsignTemplateToolStripMenuItem_Click(object sender, EventArgs e) {
+            SetCallsignTemplates setCallsignTemplates = new SetCallsignTemplates();
+            setCallsignTemplates.SetCampaign(_campaign);
+            setCallsignTemplates.ShowDialog();
+            setCallsignTemplates.Dispose();
+            PopulateOOBTree();
+            mapPanel.Invalidate();
+        }
+
+        private void saveToolStripMenuItem_Click(object sender, EventArgs e) {
+            if(_currentCampaignFileName == "") {
+                // TODO: save as
+            } else {
+                //_campaign.Serialize(path);
+            }
+        }
+
+        private void loadToolStripMenuItem_Click(object sender, EventArgs e) {
+            //_campaign = Campaign.Deserialize(path);
+        }
+
+        private void saveAsToolStripMenuItem_Click(object sender, EventArgs e) {
+
         }
     }
 }

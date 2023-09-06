@@ -1,7 +1,8 @@
-﻿namespace SBCM {
+﻿using System;
+
+namespace SBCM {
     public class Player {
         public string Name { get; }
-        public string PasswordHash { get; }
 
         public int ShotsHit { get; set; }
         public int ShotsTaken { get; set; }
@@ -19,7 +20,6 @@
 
         public Player(string name) {
             Name = name;
-            PasswordHash = ""; // TODO
 
             ShotsTaken = ShotsHit = 0;
 
@@ -34,25 +34,27 @@
         }
 
         public double GetHitPercentage() {
+            double pct = 0.0;
+
             if (ShotsTaken > 0) {
-                return 100.0 * ShotsHit / (double)ShotsTaken;
+                pct = 100.0 * ShotsHit / (double)ShotsTaken;
             }
 
-            return 0;
+            return Math.Round(pct, 2);
         }
 
         public double GetPersonalKD() {
             int losses = PersonalLosses + PersonalFratricides;
 
+            double kd = 0.0;
+
             if (losses > 0) {
-                return PersonalKills / (double)losses;
+                kd = PersonalKills / (double)losses;
+            } else if (PersonalKills > 0) {
+                kd = PersonalKills;
             }
 
-            if (PersonalKills > 0) {
-                return PersonalKills;
-            }
-
-            return 0;
+            return Math.Round(kd, 2);
         }
 
         public double GetUnitKD() {
@@ -61,15 +63,23 @@
                 + UnitLosses_Helicopters
                 + UnitLosses_Trucks;
 
+            double kd = 0.0;
+
             if (losses > 0) {
-                return UnitKills_Vehicles / (double)losses;
+                kd = UnitKills_Vehicles / (double)losses;
+            } else if (UnitKills_Vehicles > 0) {
+                kd = UnitKills_Vehicles;
             }
 
-            if (UnitKills_Vehicles > 0) {
-                return UnitKills_Vehicles;
-            }
+            return Math.Round(kd, 2);
+        }
 
-            return 0;
+        public int GetUnitLossesVehicle() {
+            return UnitLosses_Tanks
+                + UnitLosses_PCs
+                + UnitLosses_Helicopters
+                + UnitLosses_Trucks;
+
         }
     }
 }
