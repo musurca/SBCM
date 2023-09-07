@@ -137,8 +137,6 @@ namespace SBCM {
             }
 
             if (_mapImage != null) {
-                Force currentForce = _forces[(string)forceSelector.SelectedItem];
-
                 // Center map, scale by zoom, then move to anchor
                 g.TranslateTransform(_mapCenter.X, _mapCenter.Y);
                 g.ScaleTransform(_scale, _scale);
@@ -150,16 +148,17 @@ namespace SBCM {
                 _mapTransform.Invert();
 
                 // Draw the map
-                using (Pen whitePen = new Pen(Color.White)) {
-                    // Border
-                    g.DrawRectangle(whitePen, -5, -5, _mapImage.Width + 10, _mapImage.Height + 10);
-                }
+                Pen whitePen = new Pen(Color.White);
+                // Border
+                g.DrawRectangle(whitePen, -5, -5, _mapImage.Width + 10, _mapImage.Height + 10);
                 g.DrawImage(_mapImage, 0, 0);
 
                 // Draw units/platoons on the map
                 string mapViewSelect = mapShowSelector.SelectedItem.ToString();
                 MapImage map = _campaign.MapImage;
-                if (map.UTM_X_Step != 0.0f && map.UTM_Y_Step != 0.0f && mapViewSelect != "None") {
+                if (map.UTM_X_Step != 0.0f && map.UTM_Y_Step != 0.0f && mapViewSelect != "Nothing") {
+                    Force currentForce = _forces[(string)forceSelector.SelectedItem];
+
                     SolidBrush blockBrush = new SolidBrush(Color.DarkBlue);
                     SolidBrush fontBrush = new SolidBrush(Color.White);
                     if (mapViewSelect == "Platoons") {
@@ -173,6 +172,13 @@ namespace SBCM {
                                         x_pos - 10,
                                         y_pos - 10,
                                         20, 20
+                                    );
+
+                                    g.DrawRectangle(
+                                        whitePen,
+                                        x_pos - 11,
+                                        y_pos - 11,
+                                        22, 22
                                     );
 
                                     currentForce.GenerateCallsign(out string callsign, c.ID, p.ID);
@@ -196,6 +202,13 @@ namespace SBCM {
                                     20, 20
                                 );
 
+                                g.DrawRectangle(
+                                    whitePen,
+                                    x_pos - 11,
+                                    y_pos - 11,
+                                    22, 22
+                                );
+
                                 g.DrawString(
                                     u.Callsign, 
                                     SystemFonts.DefaultFont, fontBrush, 
@@ -207,6 +220,7 @@ namespace SBCM {
                     blockBrush.Dispose();
                     fontBrush.Dispose();
                 }
+                whitePen.Dispose();
             }
         }
 
@@ -689,7 +703,12 @@ namespace SBCM {
                         u.UTM_X = utm_x;
                     } else if(_selectedUnit is Platoon) {
                         Platoon p = (Platoon)_selectedUnit;
-                        p.UTM_X = utm_x;
+                        foreach (Unit u in p.Members) {
+                            if (u.UTM_X == -1) {
+                                u.UTM_X = utm_x;
+                            }
+                        }
+                        p.UpdatePosition();
                     }
                     mapPanel.Invalidate();
                 }
@@ -707,7 +726,12 @@ namespace SBCM {
                         u.UTM_Y = utm_y;
                     } else if (_selectedUnit is Platoon) {
                         Platoon p = (Platoon)_selectedUnit;
-                        p.UTM_Y = utm_y;
+                        foreach (Unit u in p.Members) {
+                            if (u.UTM_Y == -1) {
+                                u.UTM_Y = utm_y;
+                            }
+                        }
+                        p.UpdatePosition();
                     }
                     mapPanel.Invalidate();
                 }
