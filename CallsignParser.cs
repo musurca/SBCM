@@ -38,6 +38,10 @@ namespace SBCM {
         public string[] SymbolsSectionList;
         public string[] SymbolsTeamList;
 
+        public CallsignParser() {
+
+        }
+
         public CallsignParser(
             string pattern_platoon,
             string pattern_section,

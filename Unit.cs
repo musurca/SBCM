@@ -56,10 +56,10 @@ namespace SBCM {
             "GRENADE_2"
         };
 
-        public string Force { get; }
-        public string Callsign { get; }
-        public string Type { get; }
-        public string Unit_Class { get; }
+        public string Force { get; set; }
+        public string Callsign { get; set; }
+        public string Type { get; set;  }
+        public string Unit_Class { get; set; }
 
         public int Strength_Maximum { get; set; }
         public int Strength_Current { get; set; }
@@ -85,12 +85,20 @@ namespace SBCM {
 
         public DamageState Damage { get; set; }
 
+        public Unit() {
+            Initialize();
+        }
+
         public Unit(string force, string callsign, string type, string unit_class) {
             Force = force;
             Callsign = callsign;
             Type = type;
             Unit_Class = unit_class;
 
+            Initialize();
+        }
+
+        private void Initialize() {
             Strength_Current = 0;
             Strength_Maximum = 0;
 

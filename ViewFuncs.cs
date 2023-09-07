@@ -12,8 +12,12 @@ namespace SBCM {
             Dictionary<string, object> oobToUnit = new Dictionary<string, object>();
 
             TreeNode AddOOBNode(TreeNodeCollection nodes, string nodeName, object unit) {
-                oobToUnit.Add(nodeName, unit);
-                return nodes.Add(nodeName);
+                if (!oobToUnit.ContainsKey(nodeName)) {
+                    oobToUnit.Add(nodeName, unit);
+                    return nodes.Add(nodeName);
+                }
+                
+                return null;
             }
 
             Battalion b = force.Hierarchy;
@@ -32,6 +36,7 @@ namespace SBCM {
                 foreach (Platoon p in c.Platoons.Values) {
                     if (force.GenerateCallsign(out string platoonCallsign, c.ID, p.ID)) {
                         TreeNode platoonNode = AddOOBNode(companyNode.Nodes, platoonCallsign, p);
+                        if (platoonNode == null) { continue; }
 
                         List<Unit> allMembers = new List<Unit>();
                         foreach (Unit u in p.Members) {
@@ -40,13 +45,15 @@ namespace SBCM {
 
                         foreach (Unit u in p.Members) {
                             if (u.Team == "") {
-                                string unitID = $"{u.Callsign} ({u.Type})";
+                                string sectionID = $"{u.Callsign} ({u.Type})";
                                 if (p.CO == u) {
-                                    unitID += " (CO)";
+                                    sectionID += " (CO)";
                                 } else if (p.XO == u) {
-                                    unitID += " (XO)";
+                                    sectionID += " (XO)";
                                 }
-                                TreeNode sectionNode = AddOOBNode(platoonNode.Nodes, unitID, u);
+                                TreeNode sectionNode = AddOOBNode(platoonNode.Nodes, sectionID, u);
+                                if(sectionNode == null) { continue; }
+
                                 if (!u.IsOperational()) {
                                     sectionNode.ForeColor = Color.LightGray;
                                 } else if (
@@ -57,8 +64,12 @@ namespace SBCM {
                                 }
                                 foreach (Unit sub_u in p.Members) {
                                     if (sub_u.Team != "" && sub_u.Section == u.Section) {
-                                        unitID = $"{sub_u.Callsign} ({sub_u.Type})";
-                                        TreeNode node = AddOOBNode(sectionNode.Nodes, unitID, sub_u);
+                                        string teamID = $"{sub_u.Callsign} ({sub_u.Type})";
+                                        TreeNode node = AddOOBNode(sectionNode.Nodes, teamID, sub_u);
+                                        if (node == null) {
+                                            continue;
+                                        }
+
                                         if (!u.IsOperational()) {
                                             node.ForeColor = Color.LightGray;
                                         } else if (
@@ -83,6 +94,8 @@ namespace SBCM {
                                 unitID += " (XO)";
                             }
                             TreeNode node = AddOOBNode(platoonNode.Nodes, unitID, u);
+                            if(node == null) { continue; }
+
                             if (!u.IsOperational()) {
                                 node.ForeColor = Color.LightGray;
                             } else if (

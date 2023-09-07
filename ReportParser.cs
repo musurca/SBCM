@@ -80,17 +80,6 @@ namespace SBCM {
             );
             */
 
-            CallsignParser callsignParser = new CallsignParser(
-                "{company}-{platoon}",
-                "{company}-{platoon}{section}",
-                "{company}-{platoon}{section}/{team}",
-                new string[] { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M" },
-                new string[] { "1", "2", "3", "4", "5", "6", "7", "8", "9" },
-                new string[] { "1", "2", "3", "4", "5", "6", "7", "8", "9" },
-                new string[] { "A", "B", "C", "D" },
-                "CO", "XO", "CO", "XO"
-            );
-
             HtmlNodeCollection tables = htmlDoc.DocumentNode.SelectNodes("//table");
 
             const int OVERALL_PLAYERS_ROW = 5;
@@ -112,7 +101,6 @@ namespace SBCM {
 
                 if (!scenarioForces.ContainsKey(forceName)) {
                     Force newForce = new Force(forceName);
-                    //newForce.CallsignTemplate = callsignParser;
                     scenarioForces.Add(forceName, newForce);
                 }
             }
@@ -369,7 +357,7 @@ namespace SBCM {
             foreach(Force f in scenarioForces.Values) {
                 f.EstimatePositions();
             }
-
+            /*
             using (StreamWriter writer = new StreamWriter("units.csv")) {
                 writer.WriteLine(Unit.SerializeToCSVColumnHeadings());
                 foreach (Force f in scenarioForces.Values) {
@@ -378,6 +366,7 @@ namespace SBCM {
                     }
                 }
             }
+            */
 
             return true;
         }

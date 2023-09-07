@@ -12,7 +12,10 @@ using Newtonsoft.Json;
 namespace SBCM {
     public class Turn { 
         public int Index { get; set; }
-        public Dictionary<string, Force> Forces { get; set; }
+        public Dictionary<string, Force> Forces;
+
+        public Turn() {
+        }
 
         public Turn(int index, Dictionary<string, Force> forces) {
             Index = index;
@@ -49,6 +52,20 @@ namespace SBCM {
             SetUTMStep(0.0f, 0.0f);
         }
 
+        public void ImageToUTM(Point imagePos, out int x, out int y) {
+            x = (int)(UTM_Anchor_X + UTM_X_Step * imagePos.X);
+            y = (int)(UTM_Anchor_Y + UTM_Y_Step * imagePos.Y);
+        }
+
+        public void UTMToImage(int utm_x, int utm_y, out int x, out int y) {
+            if (UTM_X_Step != 0.0f && UTM_Y_Step != 0.0f) {
+                x = (int)((utm_x - UTM_Anchor_X) / UTM_X_Step);
+                y = (int)((utm_y - UTM_Anchor_Y) / UTM_Y_Step);
+            } else {
+                x = y = 0;
+            }
+        }
+
         public Bitmap GetBitmap() {
             return _image;
         }
@@ -80,9 +97,10 @@ namespace SBCM {
     }
 
     public class Campaign {
-        public string Name { get; }
+        public string Name { get; set; }
         public MapImage MapImage { get; set; }
         public DateTime StartDate { get; set; }
+        public bool ReadOnly { get; set; }
 
         private Dictionary<string, CallsignParser> _callsignTemplates = new Dictionary<string, CallsignParser>();
         public Dictionary<string, CallsignParser> CallsignTemplates {
@@ -96,7 +114,7 @@ namespace SBCM {
             }
         }
 
-        private List<Turn> _turns;
+        private List<Turn> _turns = new List<Turn>();
         public List<Turn> Turns {
             get {
                 return _turns;
@@ -106,6 +124,10 @@ namespace SBCM {
                 _turns = value;
                 ApplyCallsignTemplates();
             }
+        }
+
+        public Campaign() {
+
         }
 
         public Campaign(
@@ -118,24 +140,34 @@ namespace SBCM {
             StartDate = startDate;
             MapImage = mapImage;
             Turns = new List<Turn>();
+            ReadOnly = false;
 
             NextTurn(forces);
         }
 
         private void ApplyCallsignTemplates() {
-            if (_callsignTemplates?.Count > 0) {
+            if (_callsignTemplates.Values.Count > 0) {
                 foreach (Turn turn in Turns) {
-                    foreach (Force f in turn.Forces.Values) {
-                        if (_callsignTemplates.ContainsKey(f.Name)) {
-                            f.SetCallsignTemplate(_callsignTemplates[f.Name]);
+                    foreach(string key in turn.Forces.Keys) {
+                        if(turn.Forces.TryGetValue(key, out Force force)) {
+                            if (_callsignTemplates.ContainsKey(key)) {
+                                force.SetCallsignTemplate(
+                                    _callsignTemplates[key]
+                                );
+                            }
+                            force.EstimatePositions();
                         }
                     }
                 }
             }
         }
 
-        private void SetCallsignTemplate(string forceName, CallsignParser template) {
-            _callsignTemplates.Add(forceName, template);
+        public void SetCallsignTemplate(string forceName, CallsignParser template) {
+            if (_callsignTemplates.ContainsKey(forceName)) {
+                _callsignTemplates[forceName] = template;
+            } else {
+                _callsignTemplates.Add(forceName, template);
+            }
             foreach (Turn turn in Turns) {
                 if(turn.Forces.ContainsKey(forceName)) {
                     Force f = turn.Forces[forceName];
@@ -158,12 +190,16 @@ namespace SBCM {
 
         public void Serialize(string filepath) {
             string json = JsonConvert.SerializeObject(this);
-            File.WriteAllText(filepath, json);
+            File.WriteAllText(filepath, GZip.Compress(json));
         }
 
         public static Campaign Deserialize(string filepath) {
-            string json = File.ReadAllText(filepath);
-            return JsonConvert.DeserializeObject<Campaign>(json);
+            string gzjson = File.ReadAllText(filepath);
+            Campaign cam = JsonConvert.DeserializeObject<Campaign>(
+                GZip.Decompress(gzjson)
+            );
+            cam.ApplyCallsignTemplates();
+            return cam;
         }
     }
 }

@@ -25,7 +25,7 @@ namespace SBCM {
             "1", "2", "3", "4", "5", "6", "7", "8", "9"
         };
         static readonly string[] DEFAULT_TEAM_IDS = new string[] {
-            "1", "2", "3", "4"
+            "A", "B", "C", "D"
         };
 
         static readonly string DEFAULT_COMPANY_CO = "66";
@@ -43,7 +43,7 @@ namespace SBCM {
         List<TextBox> _sectionIDs;
         List<TextBox> _teamIDs;
 
-        public SetCallsignTemplates() {
+        public SetCallsignTemplates(Campaign campaign) {
             InitializeComponent();
             _currentForceName = "";
 
@@ -68,25 +68,42 @@ namespace SBCM {
             _teamIDs = new List<TextBox> {
                 teamIDBox01, teamIDBox02, teamIDBox03, teamIDBox04
             };
+
+            SetCampaign(campaign);
         }
 
         public void SetCampaign(Campaign campaign) {
             _campaign = campaign;
-            _templates = _campaign.CallsignTemplates;
+            _templates = new Dictionary<string, CallsignParser>();
+            Dictionary<string, CallsignParser> existingTemplates = _campaign.CallsignTemplates;
+            foreach (string key in existingTemplates.Keys) {
+                _templates.Add(key, existingTemplates[key]);
+            }
             _lastTurn = _campaign.GetLastTurn();
+
+            CallsignParser defaultTemplate = MakeDefaultTemplate();
 
             sideSelector.Items.Clear();
             foreach(Force f in _lastTurn.Forces.Values) {
+                if(!_templates.ContainsKey(f.Name)) {
+                    _templates.Add(f.Name, defaultTemplate);
+                }
                 sideSelector.Items.Add(f.Name);
             }
-            _currentForceName = sideSelector.Items.Count > 0 ? sideSelector.Items[0].ToString() : "";
-            sideSelector.SelectedItem = _currentForceName != ""
-                ? _currentForceName
-                : null;
-            if (_currentForceName == "") { 
-                btnVerify.Enabled = false; 
-            }
+            _currentForceName = sideSelector.Items[0].ToString();
             PopulateTextBoxes();
+
+            sideSelector.SelectedItem = _currentForceName;
+        }
+
+        private CallsignParser MakeDefaultTemplate() {
+            return new CallsignParser(
+                DEFAULT_PATTERN_PLATOON, DEFAULT_PATTERN_SECTION, DEFAULT_PATTERN_TEAM,
+                DEFAULT_COMPANY_IDS, DEFAULT_PLATOON_IDS, 
+                DEFAULT_SECTION_IDS, DEFAULT_TEAM_IDS, 
+                DEFAULT_COMPANY_CO, DEFAULT_COMPANY_XO, 
+                DEFAULT_PLATOON_CO, DEFAULT_PLATOON_XO
+            );
         }
 
         private void PopulateTextBoxes() {
@@ -101,95 +118,68 @@ namespace SBCM {
                 }
             }
 
-            if (_templates.ContainsKey(_currentForceName)) {
-                CallsignParser template = _templates[_currentForceName];
+            CallsignParser template = _templates[_currentForceName];
 
-                patternPlatoonBox.Text = template.PatternPlatoon;
-                patternSectionBox.Text = template.PatternSection;
-                patternTeamBox.Text = template.PatternTeam;
+            patternPlatoonBox.Text = template.PatternPlatoon;
+            patternSectionBox.Text = template.PatternSection;
+            patternTeamBox.Text = template.PatternTeam;
 
-                PopulateTextBoxesFromArray(_companyIDs, template.SymbolsCompanyList);
-                PopulateTextBoxesFromArray(_platoonIDs, template.SymbolsPlatoonList);
-                PopulateTextBoxesFromArray(_sectionIDs, template.SymbolsSectionList);
-                PopulateTextBoxesFromArray(_teamIDs, template.SymbolsTeamList);
+            PopulateTextBoxesFromArray(_companyIDs, template.SymbolsCompanyList);
+            PopulateTextBoxesFromArray(_platoonIDs, template.SymbolsPlatoonList);
+            PopulateTextBoxesFromArray(_sectionIDs, template.SymbolsSectionList);
+            PopulateTextBoxesFromArray(_teamIDs, template.SymbolsTeamList);
 
-                companyIDBoxCO.Text = template.SymbolCompanyCO;
-                companyIDBoxXO.Text = template.SymbolCompanyXO;
-                platoonIDBoxCO.Text = template.SymbolPlatoonCO;
-                platoonIDBoxXO.Text = template.SymbolPlatoonXO;
-            } else {
-                // Build default
-
-                patternPlatoonBox.Text = DEFAULT_PATTERN_PLATOON;
-                patternSectionBox.Text = DEFAULT_PATTERN_SECTION;
-                patternTeamBox.Text = DEFAULT_PATTERN_TEAM;
-
-                PopulateTextBoxesFromArray(_companyIDs, DEFAULT_COMPANY_IDS);
-                PopulateTextBoxesFromArray(_platoonIDs, DEFAULT_PLATOON_IDS);
-                PopulateTextBoxesFromArray(_sectionIDs, DEFAULT_SECTION_IDS);
-                PopulateTextBoxesFromArray(_teamIDs, DEFAULT_TEAM_IDS);
-
-                companyIDBoxCO.Text = DEFAULT_COMPANY_CO;
-                companyIDBoxXO.Text = DEFAULT_COMPANY_XO;
-                platoonIDBoxCO.Text = DEFAULT_PLATOON_CO;
-                platoonIDBoxXO.Text = DEFAULT_PLATOON_XO;
-            }
+            companyIDBoxCO.Text = template.SymbolCompanyCO;
+            companyIDBoxXO.Text = template.SymbolCompanyXO;
+            platoonIDBoxCO.Text = template.SymbolPlatoonCO;
+            platoonIDBoxXO.Text = template.SymbolPlatoonXO;
         }
 
 
         private CallsignParser MakeTemplate() {
-            if (_currentForceName != "") {
-                string patternPlatoon = patternPlatoonBox.Text.Trim();
-                string patternSection = patternSectionBox.Text.Trim();
-                string patternTeam = patternTeamBox.Text.Trim();
+            string patternPlatoon = patternPlatoonBox.Text.Trim();
+            string patternSection = patternSectionBox.Text.Trim();
+            string patternTeam = patternTeamBox.Text.Trim();
 
-                List<string> BuildSymbolList(List<TextBox> boxList) {
-                    List<string> symList = new List<string>();
-                    foreach (TextBox box in boxList) {
-                        string txt = box.Text.Trim();
-                        if (txt.Length > 0) {
-                            symList.Add(txt);
-                        }
+            List<string> BuildSymbolList(List<TextBox> boxList) {
+                List<string> symList = new List<string>();
+                foreach (TextBox box in boxList) {
+                    string txt = box.Text.Trim();
+                    if (txt.Length > 0) {
+                        symList.Add(txt);
                     }
-                    return symList;
                 }
-
-                List<string> companyIDs = BuildSymbolList(_companyIDs);
-                List<string> platoonIDs = BuildSymbolList(_platoonIDs);
-                List<string> sectionIDs = BuildSymbolList(_sectionIDs);
-                List<string> teamIDs = BuildSymbolList(_teamIDs);
-
-                string companyCO = companyIDBoxCO.Text.Trim();
-                string companyXO = companyIDBoxXO.Text.Trim();
-                string platoonCO = platoonIDBoxCO.Text.Trim();
-                string platoonXO = platoonIDBoxXO.Text.Trim();
-
-                return new CallsignParser(
-                    patternPlatoon, patternSection, patternTeam, 
-                    companyIDs.ToArray(), platoonIDs.ToArray(), 
-                    sectionIDs.ToArray(), teamIDs.ToArray(), 
-                    companyCO, companyXO, platoonCO, platoonXO
-                );
+                return symList;
             }
-            return null;
+
+            List<string> companyIDs = BuildSymbolList(_companyIDs);
+            List<string> platoonIDs = BuildSymbolList(_platoonIDs);
+            List<string> sectionIDs = BuildSymbolList(_sectionIDs);
+            List<string> teamIDs = BuildSymbolList(_teamIDs);
+
+            string companyCO = companyIDBoxCO.Text.Trim();
+            string companyXO = companyIDBoxXO.Text.Trim();
+            string platoonCO = platoonIDBoxCO.Text.Trim();
+            string platoonXO = platoonIDBoxXO.Text.Trim();
+
+            return new CallsignParser(
+                patternPlatoon, patternSection, patternTeam, 
+                companyIDs.ToArray(), platoonIDs.ToArray(), 
+                sectionIDs.ToArray(), teamIDs.ToArray(), 
+                companyCO, companyXO, platoonCO, platoonXO
+            );
         }
 
         private CallsignParser SaveCurrentTemplate() {
             // Save our current template
             CallsignParser template = MakeTemplate();
-            if (template != null) {
-                if (_templates.ContainsKey(_currentForceName)) {
-                    _templates[_currentForceName] = template;
-                } else {
-                    _templates.Add(_currentForceName, template);
-                }
-            }
+            _templates[_currentForceName] = template;
             return template;
         }
 
         private void VerifyTemplate() {
             CallsignParser template = SaveCurrentTemplate();
-            Force f = _lastTurn.Forces[(string)sideSelector.SelectedItem];
+            Force f = _lastTurn.Forces[_currentForceName];
             f.SetCallsignTemplate(template);
             ViewFuncs.PopulateTreeViewWithOOB(oobView, f);
         }
@@ -202,12 +192,8 @@ namespace SBCM {
 
             // Load the next template
             Force f = _lastTurn.Forces[_currentForceName];
-            if (_templates.ContainsKey(f.Name)) {
-                f.SetCallsignTemplate(_templates[f.Name]);
-                ViewFuncs.PopulateTreeViewWithOOB(oobView, f);
-            } else {
-                VerifyTemplate();
-            }
+            f.SetCallsignTemplate(_templates[_currentForceName]);
+            ViewFuncs.PopulateTreeViewWithOOB(oobView, f);
         }
 
         private void btnVerify_Click(object sender, EventArgs e) {
@@ -215,9 +201,16 @@ namespace SBCM {
         }
 
         private void btnFinish_Click(object sender, EventArgs e) {
-            _campaign.CallsignTemplates = _templates;
+            SaveCurrentTemplate();
+            foreach(string forceName in _templates.Keys) {
+                _campaign.SetCallsignTemplate(forceName, _templates[forceName]);
+            }
 
             DialogResult = DialogResult.OK;
+        }
+
+        private void onBox_Leave(object sender, EventArgs e) {
+            VerifyTemplate();
         }
     }
 }

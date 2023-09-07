@@ -340,7 +340,7 @@ namespace SBCM {
         public Battalion Hierarchy { get; set; } = new Battalion();
         public List<Player> Players { get; set; } = new List<Player>();
 
-        private Dictionary<string, Unit> _units;
+        private Dictionary<string, Unit> _units = new Dictionary<string, Unit>();
         public Dictionary<string, Unit> Units { 
             get {
                 return _units;
@@ -357,7 +357,6 @@ namespace SBCM {
 
         public Force(string name) {
             Name = name;
-            Units = new Dictionary<string, Unit>();
             _callsignTemplate = null;
         }
 

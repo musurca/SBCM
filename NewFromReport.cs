@@ -75,34 +75,52 @@ namespace SBCM {
         private void btnNext_Click(object sender, EventArgs e) {
             DisableInput();
 
+            Dictionary<string, Force> forces = new Dictionary<string, Force>();
+            try {
+                ReportParser.MergeReport(
+                    reportFilePath.Text,
+                    forces
+                );
+            } catch {
+                // TODO: error message: can't parse battle report!
+                EnableInput();
+                return;
+            }
+
             MapImage mapImage = new MapImage(mapImageURL.Text);
-            if(mapImage.GetBitmap() == null) {
-                // TODO: error dialog
+            if (mapImage.GetBitmap() == null) {
+                // TODO: error message : can't load image from URL!
                 mapImageURL.Text = "";
                 EnableInput();
                 return;
-            } else {
-                // TODO: Calibrate the image
             }
 
-            Dictionary<string, Force> forces = new Dictionary<string, Force>();
-            ReportParser.MergeReport(
-                reportFilePath.Text,
-                forces
-            );
+            using (CalibrateMapImage calibrateImage = new CalibrateMapImage(mapImage)) {
+                if (calibrateImage.ShowDialog() != DialogResult.OK) {
+                    EnableInput();
+                    return;
+                }
+            }
 
-            NewCampaign = new Campaign(
-                campaignName.Text, 
-                campaignDate.Value, 
-                mapImage, 
-                forces
-            );
+            if (forces.Count > 0) {
+                NewCampaign = new Campaign(
+                    campaignName.Text,
+                    campaignDate.Value,
+                    mapImage,
+                    forces
+                );
 
-            SetCallsignTemplates setCallsignTemplates = new SetCallsignTemplates();
-            setCallsignTemplates.SetCampaign(NewCampaign);
-            if (setCallsignTemplates.ShowDialog() == DialogResult.OK) {
-                DialogResult = DialogResult.OK;
+                using (
+                    SetCallsignTemplates setCallsignTemplates = new SetCallsignTemplates(NewCampaign)
+                ) {
+                    if (setCallsignTemplates.ShowDialog() == DialogResult.OK) {
+                        DialogResult = DialogResult.OK;
+                    }
+                }
+
+                
             } else {
+                // TODO: error message: no valid forces found in report!
                 EnableInput();
             }
         }

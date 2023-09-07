@@ -19,10 +19,14 @@ namespace SBCM {
 
         string _currentCampaignFileName;
 
-        Dictionary<string, Force> _forces;
+        Dictionary<string, Force> _forces = new Dictionary<string, Force>();
 
         Dictionary<string, object> _oobToUnit;
         Campaign _campaign;
+
+        object _selectedUnit;
+
+        Matrix _mapTransform;
 
         // TEST URL = https://i.imgur.com/aqIr9Ol.png
 
@@ -45,6 +49,8 @@ namespace SBCM {
 
             campaignName.Text = "";
             turnCounter.Text = "";
+            labelUTMX.Text = "";
+            labelUTMY.Text = "";
 
             _currentCampaignFileName = "";
 
@@ -53,7 +59,7 @@ namespace SBCM {
                 rect.Left + (int)((rect.Right - rect.Left) * 0.5),
                 rect.Top + (int)((rect.Bottom - rect.Top) * 0.5)
             );
-            _mapAnchor = new Point(-_mapCenter.X, -_mapCenter.Y);
+            //_mapAnchor = new Point(-_mapCenter.X, -_mapCenter.Y);
 
             // Load Report
             //_forces = new Dictionary<string, Force>();
@@ -116,7 +122,7 @@ namespace SBCM {
         }
 
         private void PopulateOOBTree() {
-            if (_forces != null) {
+            if (_forces != null && forceSelector.SelectedItem != null) {
                 Force currentForce = _forces[(string)forceSelector.SelectedItem];
                 _oobToUnit = ViewFuncs.PopulateTreeViewWithOOB(oobTree, currentForce);
             }
@@ -137,31 +143,80 @@ namespace SBCM {
                 g.TranslateTransform(_mapCenter.X, _mapCenter.Y);
                 g.ScaleTransform(_scale, _scale);
                 g.TranslateTransform(_mapAnchor.X, _mapAnchor.Y);
+
+                // Store inverse of transform
+                _mapTransform?.Dispose();
+                _mapTransform = g.Transform;
+                _mapTransform.Invert();
+
+                // Draw the map
                 using (Pen whitePen = new Pen(Color.White)) {
+                    // Border
                     g.DrawRectangle(whitePen, -5, -5, _mapImage.Width + 10, _mapImage.Height + 10);
                 }
                 g.DrawImage(_mapImage, 0, 0);
 
-                SolidBrush blockBrush = new SolidBrush(Color.DarkBlue);
-                SolidBrush fontBrush = new SolidBrush(Color.White);
-                foreach (Company c in currentForce.Hierarchy.Companies.Values) {
-                    foreach (Platoon p in c.Platoons.Values) {
-                        if (p.UTM_X != -1 && p.UTM_Y != -1) {
-                            g.FillRectangle(
-                                blockBrush,
+                // Draw units/platoons on the map
+                string mapViewSelect = mapShowSelector.SelectedItem.ToString();
+                MapImage map = _campaign.MapImage;
+                if (map.UTM_X_Step != 0.0f && map.UTM_Y_Step != 0.0f && mapViewSelect != "None") {
+                    SolidBrush blockBrush = new SolidBrush(Color.DarkBlue);
+                    SolidBrush fontBrush = new SolidBrush(Color.White);
+                    if (mapViewSelect == "Platoons") {
+                        foreach (Company c in currentForce.Hierarchy.Companies.Values) {
+                            foreach (Platoon p in c.Platoons.Values) {
+                                if (p.UTM_X != -1 && p.UTM_Y != -1) {
+                                    map.UTMToImage(p.UTM_X, p.UTM_Y, out int x_pos, out int y_pos);
 
-                                    p.UTM_X - 10, p.UTM_Y / 10 - 10,
+                                    g.FillRectangle(
+                                        blockBrush,
+                                        x_pos - 10,
+                                        y_pos - 10,
+                                        20, 20
+                                    );
+
+                                    currentForce.GenerateCallsign(out string callsign, c.ID, p.ID);
+                                    g.DrawString(
+                                        callsign, 
+                                        SystemFonts.DefaultFont, fontBrush, 
+                                        x_pos - 10, y_pos - 10
+                                    );
+                                }
+                            }
+                        }
+                    } else {
+                        foreach (Unit u in currentForce.Units.Values) {
+                            if (u.UTM_X != -1 && u.UTM_Y != -1) {
+                                map.UTMToImage(u.UTM_X, u.UTM_Y, out int x_pos, out int y_pos);
+
+                                g.FillRectangle(
+                                    blockBrush,
+                                    x_pos - 10,
+                                    y_pos - 10,
                                     20, 20
+                                );
 
-                            );
-                            currentForce.GenerateCallsign(out string callsign, c.ID, p.ID);
-                            g.DrawString(callsign, SystemFonts.DefaultFont, fontBrush, p.UTM_X - 10, p.UTM_Y / 10 - 10);
+                                g.DrawString(
+                                    u.Callsign, 
+                                    SystemFonts.DefaultFont, fontBrush, 
+                                    x_pos - 10, y_pos - 10
+                               );
+                            }
                         }
                     }
+                    blockBrush.Dispose();
+                    fontBrush.Dispose();
                 }
-                blockBrush.Dispose();
-                fontBrush.Dispose();
             }
+        }
+
+        private Point PanelToImage(Point panelPoint) {
+            if (_mapTransform != null) {
+                Point[] transPt = new Point[] { panelPoint };
+                _mapTransform.TransformPoints(transPt);
+                return transPt[0];
+            }
+            return new Point(0, 0);
         }
 
         private void mapPanel_MouseMove(object sender, MouseEventArgs e) {
@@ -175,10 +230,24 @@ namespace SBCM {
 
                 mapPanel.Invalidate();
             }
+            if(_mapImage != null) {
+                MapImage map = _campaign.MapImage;
+
+                map.ImageToUTM(
+                    PanelToImage(e.Location), 
+                    out int utm_x, out int utm_y
+                );
+                labelUTMX.Text = utm_x.ToString();
+                labelUTMY.Text = utm_y.ToString();
+            } else {
+                labelUTMX.Text = "";
+                labelUTMY.Text = "";
+            }
+
         }
 
         private void mapPanel_MouseDown(object sender, MouseEventArgs e) {
-            if (e.Button == MouseButtons.Right) {
+            if (e.Button == MouseButtons.Right && _mapImage != null) {
                 _startPoint = e.Location;
                 _mouseDown = true;
             }
@@ -196,7 +265,12 @@ namespace SBCM {
         }
 
         private void forceSelector_SelectedIndexChanged(object sender, EventArgs e) {
-            Force currentForce = _forces[(string)forceSelector.SelectedItem];
+            Force currentForce = null;
+            if (forceSelector.SelectedItem != null) {
+                if (_forces.ContainsKey(forceSelector.SelectedItem.ToString())) {
+                    currentForce = _forces[forceSelector.SelectedItem.ToString()];
+                }
+            }
 
             eventGrid.Rows.Clear();
             playerGrid.Rows.Clear();
@@ -205,59 +279,70 @@ namespace SBCM {
             PopulateOOBTree();
 
             // Populate units
-            foreach(ShotEvent evt in currentForce?.GetEvents()) {
-                eventGrid.Rows.Add(evt.Time, evt.EventText);
+            if (currentForce != null) {
+                foreach (ShotEvent evt in currentForce.GetEvents()) {
+                    eventGrid.Rows.Add(evt.Time, evt.EventText);
+                }
             }
             eventGrid.ClearSelection();
 
             // Populate players
-            foreach (Player player in currentForce?.GetPlayers()) {
-                playerGrid.Rows.Add(
-                    player.Name,
-                    player.GetHitPercentage(),
-                    player.GetPersonalKD(), 
-                    player.GetUnitKD(),
-                    player.PersonalKills,
-                    player.PersonalLosses,
-                    player.PersonalFratricides,
-                    player.UnitKills_Vehicles,
-                    player.GetUnitLossesVehicle(),
-                    player.UnitLosses_Personnel
-                );
+            if (currentForce != null) {
+                foreach (Player player in currentForce?.GetPlayers()) {
+                    playerGrid.Rows.Add(
+                        player.Name,
+                        player.GetHitPercentage(),
+                        player.GetPersonalKD(),
+                        player.GetUnitKD(),
+                        player.PersonalKills,
+                        player.PersonalLosses,
+                        player.PersonalFratricides,
+                        player.UnitKills_Vehicles,
+                        player.GetUnitLossesVehicle(),
+                        player.UnitLosses_Personnel
+                    );
+                }
             }
             playerGrid.ClearSelection();
 
             mapPanel.Invalidate();
         }
 
-        private void newToolStripMenuItem_Click(object sender, EventArgs e) {
-            NewFromReport newFromReport = new NewFromReport();
-            if (newFromReport.ShowDialog() == DialogResult.OK) {
-                _campaign = newFromReport.NewCampaign;
+        private void LoadCampaign(Campaign campaign) {
+            _campaign = campaign;
 
-                campaignName.Text = _campaign.Name;
-                _mapImage = _campaign.MapImage.GetBitmap();
+            campaignName.Text = _campaign.Name;
+            _mapImage = _campaign.MapImage.GetBitmap();
+            _mapAnchor = new Point(-_mapImage.Width / 2, -_mapImage.Height / 2);
 
-                Turn curTurn = _campaign.GetLastTurn();
-                turnCounter.Text = curTurn.Index == 0 
-                    ? "Setup Phase" 
-                    : $"Turn {curTurn.Index}";
+            Turn curTurn = _campaign.GetLastTurn();
+            turnCounter.Text = curTurn.Index == 0
+                ? "Setup Phase"
+                : $"Turn {curTurn.Index}";
 
-                _forces = curTurn.Forces;
+            _forces = curTurn.Forces;
 
-                foreach (string forceName in _forces.Keys) {
-                    forceSelector.Items.Add(forceName);
-                }
-                forceSelector.SelectedItem = _forces.Keys.ToList()[0];
-
-                editCallsignTemplateToolStripMenuItem.Enabled = true;
-                updateToolStripMenuItem.Enabled = true;
-                campaignStateToolStripMenuItem.Enabled = true;
-                unitsToCSVToolStripMenuItem.Enabled = true;
-                saveAsToolStripMenuItem.Enabled = true;
-                saveToolStripMenuItem.Enabled = true;
+            forceSelector.Items.Clear();
+            foreach (string forceName in _forces.Keys) {
+                forceSelector.Items.Add(forceName);
             }
-            newFromReport.Dispose();
+            forceSelector.SelectedItem = _forces.Keys.ToList()[0];
+
+            editCallsignTemplateToolStripMenuItem.Enabled = true;
+            recalibrateMapImageToolStripMenuItem.Enabled = true;
+            nextTurnFromReportToolStripMenuItem.Enabled = true;
+            campaignStateToolStripMenuItem.Enabled = true;
+            unitsToCSVToolStripMenuItem.Enabled = true;
+            saveAsToolStripMenuItem.Enabled = true;
+            saveToolStripMenuItem.Enabled = true;
+        }
+
+        private void newToolStripMenuItem_Click(object sender, EventArgs e) {
+            using (NewFromReport newFromReport = new NewFromReport()) {
+                if (newFromReport.ShowDialog() == DialogResult.OK) {
+                    LoadCampaign(newFromReport.NewCampaign);
+                }
+            }
         }
 
         private void nextTurnFromReportToolStripMenuItem_Click(object sender, EventArgs e) {
@@ -277,6 +362,10 @@ namespace SBCM {
             ammoGrid.Rows.Clear();
    
             if(obj != null) {
+                _selectedUnit = obj;
+                utmXBox.Enabled = !_campaign.ReadOnly && !(obj is Company);
+                utmYBox.Enabled = !_campaign.ReadOnly && !(obj is Company);
+
                 if (obj is Unit) {
                     // Single unit selectec
                     Unit u = (Unit)obj;
@@ -519,13 +608,8 @@ namespace SBCM {
             mapPanel.Invalidate();
         }
 
-        private void MainWindow_Load(object sender, EventArgs e) {
-
-        }
-
         private void editCallsignTemplateToolStripMenuItem_Click(object sender, EventArgs e) {
-            SetCallsignTemplates setCallsignTemplates = new SetCallsignTemplates();
-            setCallsignTemplates.SetCampaign(_campaign);
+            SetCallsignTemplates setCallsignTemplates = new SetCallsignTemplates(_campaign);
             setCallsignTemplates.ShowDialog();
             setCallsignTemplates.Dispose();
             PopulateOOBTree();
@@ -534,18 +618,102 @@ namespace SBCM {
 
         private void saveToolStripMenuItem_Click(object sender, EventArgs e) {
             if(_currentCampaignFileName == "") {
-                // TODO: save as
+                SaveAs();
             } else {
-                //_campaign.Serialize(path);
+                Save();
             }
         }
 
         private void loadToolStripMenuItem_Click(object sender, EventArgs e) {
-            //_campaign = Campaign.Deserialize(path);
+            using (OpenFileDialog dialog = new OpenFileDialog()) {
+                dialog.Filter = "Campaigns (*.cam)|*.cam";
+                dialog.FilterIndex = 0;
+                dialog.RestoreDirectory = true;
+
+                // Show the dialog and check if the user clicked OK
+                if (dialog.ShowDialog() == DialogResult.OK && dialog.FileName != "") {
+                    LoadCampaign(
+                        Campaign.Deserialize(dialog.FileName)
+                    );
+                }
+            }
         }
 
         private void saveAsToolStripMenuItem_Click(object sender, EventArgs e) {
+            SaveAs();
+        }
 
+        private void SaveAs() {
+            using (SaveFileDialog saveFileDialog = new SaveFileDialog()) { 
+                saveFileDialog.Filter = "Campaigns (*.cam)|*.cam";
+                saveFileDialog.Title = "Save campaign file";
+                saveFileDialog.ShowDialog();
+
+                // If the file name is not an empty string open it for saving.
+                if (saveFileDialog.FileName != "") {
+                    _currentCampaignFileName = saveFileDialog.FileName;
+                    Save();
+                }
+            }
+        }
+
+        private void Save() {
+            _campaign.Serialize(_currentCampaignFileName);
+        }
+
+        private void MainWindow_SizeChanged(object sender, EventArgs e) {
+            Rectangle rect = mapPanel.ClientRectangle;
+            _mapCenter = new Point(
+                rect.Left + (int)((rect.Right - rect.Left) * 0.5),
+                rect.Top + (int)((rect.Bottom - rect.Top) * 0.5)
+            );
+            mapPanel.Invalidate();
+        }
+
+        private void recalibrateMapImageToolStripMenuItem_Click(object sender, EventArgs e) {
+            using(CalibrateMapImage cmi = new CalibrateMapImage(_campaign.MapImage)) {
+                cmi.ShowDialog();
+            }
+        }
+
+        private void MainWindow_FormClosing(object sender, FormClosingEventArgs e) {
+            _mapTransform?.Dispose();
+        }
+
+        private void utmXBox_Leave(object sender, EventArgs e) {
+            try {
+                int utm_x = int.Parse(utmXBox.Text.Trim());
+                if(_selectedUnit != null) {
+                    if(_selectedUnit is Unit) {
+                        Unit u = (Unit)_selectedUnit;
+                        u.UTM_X = utm_x;
+                    } else if(_selectedUnit is Platoon) {
+                        Platoon p = (Platoon)_selectedUnit;
+                        p.UTM_X = utm_x;
+                    }
+                    mapPanel.Invalidate();
+                }
+            } catch {
+                // Ignore
+            }
+        }
+
+        private void utmYBox_Leave(object sender, EventArgs e) {
+            try {
+                int utm_y = int.Parse(utmYBox.Text.Trim());
+                if (_selectedUnit != null) {
+                    if (_selectedUnit is Unit) {
+                        Unit u = (Unit)_selectedUnit;
+                        u.UTM_Y = utm_y;
+                    } else if (_selectedUnit is Platoon) {
+                        Platoon p = (Platoon)_selectedUnit;
+                        p.UTM_Y = utm_y;
+                    }
+                    mapPanel.Invalidate();
+                }
+            } catch {
+                // Ignore
+            }
         }
     }
 }

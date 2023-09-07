@@ -149,7 +149,6 @@
             this.label4 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
-            this.btnVerify = new System.Windows.Forms.Button();
             this.btnFinish = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox10.SuspendLayout();
@@ -204,7 +203,6 @@
             // 
             // groupBox10
             // 
-            this.groupBox10.Controls.Add(this.btnVerify);
             this.groupBox10.Controls.Add(this.oobView);
             this.groupBox10.Location = new System.Drawing.Point(741, 13);
             this.groupBox10.Name = "groupBox10";
@@ -217,7 +215,7 @@
             // 
             this.oobView.Location = new System.Drawing.Point(6, 19);
             this.oobView.Name = "oobView";
-            this.oobView.Size = new System.Drawing.Size(188, 343);
+            this.oobView.Size = new System.Drawing.Size(188, 366);
             this.oobView.TabIndex = 41;
             // 
             // groupBox5
@@ -244,6 +242,7 @@
             this.teamIDBox04.Size = new System.Drawing.Size(73, 20);
             this.teamIDBox04.TabIndex = 14;
             this.teamIDBox04.Text = "D";
+            this.teamIDBox04.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label65
             // 
@@ -261,6 +260,7 @@
             this.teamIDBox03.Size = new System.Drawing.Size(73, 20);
             this.teamIDBox03.TabIndex = 12;
             this.teamIDBox03.Text = "C";
+            this.teamIDBox03.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label66
             // 
@@ -278,6 +278,7 @@
             this.teamIDBox02.Size = new System.Drawing.Size(73, 20);
             this.teamIDBox02.TabIndex = 10;
             this.teamIDBox02.Text = "B";
+            this.teamIDBox02.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label67
             // 
@@ -295,6 +296,7 @@
             this.teamIDBox01.Size = new System.Drawing.Size(73, 20);
             this.teamIDBox01.TabIndex = 8;
             this.teamIDBox01.Text = "A";
+            this.teamIDBox01.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label68
             // 
@@ -352,6 +354,7 @@
             this.sectionIDBox16.Name = "sectionIDBox16";
             this.sectionIDBox16.Size = new System.Drawing.Size(73, 20);
             this.sectionIDBox16.TabIndex = 38;
+            this.sectionIDBox16.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label22
             // 
@@ -368,6 +371,7 @@
             this.sectionIDBox15.Name = "sectionIDBox15";
             this.sectionIDBox15.Size = new System.Drawing.Size(73, 20);
             this.sectionIDBox15.TabIndex = 36;
+            this.sectionIDBox15.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label38
             // 
@@ -384,6 +388,7 @@
             this.sectionIDBox14.Name = "sectionIDBox14";
             this.sectionIDBox14.Size = new System.Drawing.Size(73, 20);
             this.sectionIDBox14.TabIndex = 34;
+            this.sectionIDBox14.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label39
             // 
@@ -400,6 +405,7 @@
             this.sectionIDBox13.Name = "sectionIDBox13";
             this.sectionIDBox13.Size = new System.Drawing.Size(73, 20);
             this.sectionIDBox13.TabIndex = 32;
+            this.sectionIDBox13.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label40
             // 
@@ -416,6 +422,7 @@
             this.sectionIDBox12.Name = "sectionIDBox12";
             this.sectionIDBox12.Size = new System.Drawing.Size(73, 20);
             this.sectionIDBox12.TabIndex = 30;
+            this.sectionIDBox12.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label41
             // 
@@ -432,6 +439,7 @@
             this.sectionIDBox11.Name = "sectionIDBox11";
             this.sectionIDBox11.Size = new System.Drawing.Size(73, 20);
             this.sectionIDBox11.TabIndex = 28;
+            this.sectionIDBox11.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label42
             // 
@@ -448,6 +456,7 @@
             this.sectionIDBox10.Name = "sectionIDBox10";
             this.sectionIDBox10.Size = new System.Drawing.Size(73, 20);
             this.sectionIDBox10.TabIndex = 26;
+            this.sectionIDBox10.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label43
             // 
@@ -465,6 +474,7 @@
             this.sectionIDBox09.Size = new System.Drawing.Size(73, 20);
             this.sectionIDBox09.TabIndex = 24;
             this.sectionIDBox09.Text = "9";
+            this.sectionIDBox09.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label44
             // 
@@ -482,6 +492,7 @@
             this.sectionIDBox08.Size = new System.Drawing.Size(73, 20);
             this.sectionIDBox08.TabIndex = 22;
             this.sectionIDBox08.Text = "8";
+            this.sectionIDBox08.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label45
             // 
@@ -499,6 +510,7 @@
             this.sectionIDBox07.Size = new System.Drawing.Size(73, 20);
             this.sectionIDBox07.TabIndex = 20;
             this.sectionIDBox07.Text = "7";
+            this.sectionIDBox07.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label46
             // 
@@ -516,6 +528,7 @@
             this.sectionIDBox06.Size = new System.Drawing.Size(73, 20);
             this.sectionIDBox06.TabIndex = 18;
             this.sectionIDBox06.Text = "6";
+            this.sectionIDBox06.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label47
             // 
@@ -533,6 +546,7 @@
             this.sectionIDBox05.Size = new System.Drawing.Size(73, 20);
             this.sectionIDBox05.TabIndex = 16;
             this.sectionIDBox05.Text = "5";
+            this.sectionIDBox05.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label48
             // 
@@ -550,6 +564,7 @@
             this.sectionIDBox04.Size = new System.Drawing.Size(73, 20);
             this.sectionIDBox04.TabIndex = 14;
             this.sectionIDBox04.Text = "4";
+            this.sectionIDBox04.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label49
             // 
@@ -567,6 +582,7 @@
             this.sectionIDBox03.Size = new System.Drawing.Size(73, 20);
             this.sectionIDBox03.TabIndex = 12;
             this.sectionIDBox03.Text = "3";
+            this.sectionIDBox03.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label50
             // 
@@ -584,6 +600,7 @@
             this.sectionIDBox02.Size = new System.Drawing.Size(73, 20);
             this.sectionIDBox02.TabIndex = 10;
             this.sectionIDBox02.Text = "2";
+            this.sectionIDBox02.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label51
             // 
@@ -601,6 +618,7 @@
             this.sectionIDBox01.Size = new System.Drawing.Size(73, 20);
             this.sectionIDBox01.TabIndex = 8;
             this.sectionIDBox01.Text = "1";
+            this.sectionIDBox01.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label52
             // 
@@ -669,6 +687,7 @@
             this.platoonIDBoxXO.Size = new System.Drawing.Size(73, 20);
             this.platoonIDBoxXO.TabIndex = 39;
             this.platoonIDBoxXO.Text = "Plt XO";
+            this.platoonIDBoxXO.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // groupBox9
             // 
@@ -687,6 +706,7 @@
             this.platoonIDBoxCO.Size = new System.Drawing.Size(73, 20);
             this.platoonIDBoxCO.TabIndex = 39;
             this.platoonIDBoxCO.Text = "Plt CO";
+            this.platoonIDBoxCO.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // platoonIDBox15
             // 
@@ -694,6 +714,7 @@
             this.platoonIDBox15.Name = "platoonIDBox15";
             this.platoonIDBox15.Size = new System.Drawing.Size(73, 20);
             this.platoonIDBox15.TabIndex = 36;
+            this.platoonIDBox15.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label23
             // 
@@ -710,6 +731,7 @@
             this.platoonIDBox14.Name = "platoonIDBox14";
             this.platoonIDBox14.Size = new System.Drawing.Size(73, 20);
             this.platoonIDBox14.TabIndex = 34;
+            this.platoonIDBox14.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label24
             // 
@@ -726,6 +748,7 @@
             this.platoonIDBox13.Name = "platoonIDBox13";
             this.platoonIDBox13.Size = new System.Drawing.Size(73, 20);
             this.platoonIDBox13.TabIndex = 32;
+            this.platoonIDBox13.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label25
             // 
@@ -742,6 +765,7 @@
             this.platoonIDBox12.Name = "platoonIDBox12";
             this.platoonIDBox12.Size = new System.Drawing.Size(73, 20);
             this.platoonIDBox12.TabIndex = 30;
+            this.platoonIDBox12.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label26
             // 
@@ -758,6 +782,7 @@
             this.platoonIDBox11.Name = "platoonIDBox11";
             this.platoonIDBox11.Size = new System.Drawing.Size(73, 20);
             this.platoonIDBox11.TabIndex = 28;
+            this.platoonIDBox11.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label27
             // 
@@ -774,6 +799,7 @@
             this.platoonIDBox10.Name = "platoonIDBox10";
             this.platoonIDBox10.Size = new System.Drawing.Size(73, 20);
             this.platoonIDBox10.TabIndex = 26;
+            this.platoonIDBox10.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label28
             // 
@@ -791,6 +817,7 @@
             this.platoonIDBox09.Size = new System.Drawing.Size(73, 20);
             this.platoonIDBox09.TabIndex = 24;
             this.platoonIDBox09.Text = "9";
+            this.platoonIDBox09.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label29
             // 
@@ -808,6 +835,7 @@
             this.platoonIDBox08.Size = new System.Drawing.Size(73, 20);
             this.platoonIDBox08.TabIndex = 22;
             this.platoonIDBox08.Text = "8";
+            this.platoonIDBox08.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label30
             // 
@@ -825,6 +853,7 @@
             this.platoonIDBox07.Size = new System.Drawing.Size(73, 20);
             this.platoonIDBox07.TabIndex = 20;
             this.platoonIDBox07.Text = "7";
+            this.platoonIDBox07.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label31
             // 
@@ -842,6 +871,7 @@
             this.platoonIDBox06.Size = new System.Drawing.Size(73, 20);
             this.platoonIDBox06.TabIndex = 18;
             this.platoonIDBox06.Text = "6";
+            this.platoonIDBox06.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label32
             // 
@@ -859,6 +889,7 @@
             this.platoonIDBox05.Size = new System.Drawing.Size(73, 20);
             this.platoonIDBox05.TabIndex = 16;
             this.platoonIDBox05.Text = "5";
+            this.platoonIDBox05.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label33
             // 
@@ -876,6 +907,7 @@
             this.platoonIDBox04.Size = new System.Drawing.Size(73, 20);
             this.platoonIDBox04.TabIndex = 14;
             this.platoonIDBox04.Text = "4";
+            this.platoonIDBox04.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label34
             // 
@@ -893,6 +925,7 @@
             this.platoonIDBox03.Size = new System.Drawing.Size(73, 20);
             this.platoonIDBox03.TabIndex = 12;
             this.platoonIDBox03.Text = "3";
+            this.platoonIDBox03.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label35
             // 
@@ -910,6 +943,7 @@
             this.platoonIDBox02.Size = new System.Drawing.Size(73, 20);
             this.platoonIDBox02.TabIndex = 10;
             this.platoonIDBox02.Text = "2";
+            this.platoonIDBox02.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label36
             // 
@@ -927,6 +961,7 @@
             this.platoonIDBox01.Size = new System.Drawing.Size(73, 20);
             this.platoonIDBox01.TabIndex = 8;
             this.platoonIDBox01.Text = "1";
+            this.platoonIDBox01.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label37
             // 
@@ -942,10 +977,10 @@
             this.label6.AutoSize = true;
             this.label6.Location = new System.Drawing.Point(340, 13);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(250, 39);
+            this.label6.Size = new System.Drawing.Size(360, 39);
             this.label6.TabIndex = 7;
-            this.label6.Text = "Specify ID position with the folloing special phrases:\r\n\r\n{company}  {platoon}  {" +
-    "section}  {team}";
+            this.label6.Text = "Specify the position of IDs in the callsign with the following special phrases:\r\n" +
+    "\r\n{company}  {platoon}  {section}  {team}";
             // 
             // groupBox2
             // 
@@ -1007,6 +1042,7 @@
             this.companyIDBoxXO.Size = new System.Drawing.Size(73, 20);
             this.companyIDBoxXO.TabIndex = 39;
             this.companyIDBoxXO.Text = "65";
+            this.companyIDBoxXO.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // groupBox6
             // 
@@ -1025,6 +1061,7 @@
             this.companyIDBoxCO.Size = new System.Drawing.Size(73, 20);
             this.companyIDBoxCO.TabIndex = 39;
             this.companyIDBoxCO.Text = "66";
+            this.companyIDBoxCO.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // companyIDBox16
             // 
@@ -1033,6 +1070,7 @@
             this.companyIDBox16.Size = new System.Drawing.Size(73, 20);
             this.companyIDBox16.TabIndex = 38;
             this.companyIDBox16.Text = "P";
+            this.companyIDBox16.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label14
             // 
@@ -1050,6 +1088,7 @@
             this.companyIDBox15.Size = new System.Drawing.Size(73, 20);
             this.companyIDBox15.TabIndex = 36;
             this.companyIDBox15.Text = "O";
+            this.companyIDBox15.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label15
             // 
@@ -1067,6 +1106,7 @@
             this.companyIDBox14.Size = new System.Drawing.Size(73, 20);
             this.companyIDBox14.TabIndex = 34;
             this.companyIDBox14.Text = "N";
+            this.companyIDBox14.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label16
             // 
@@ -1084,6 +1124,7 @@
             this.companyIDBox13.Size = new System.Drawing.Size(73, 20);
             this.companyIDBox13.TabIndex = 32;
             this.companyIDBox13.Text = "M";
+            this.companyIDBox13.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label17
             // 
@@ -1101,6 +1142,7 @@
             this.companyIDBox12.Size = new System.Drawing.Size(73, 20);
             this.companyIDBox12.TabIndex = 30;
             this.companyIDBox12.Text = "L";
+            this.companyIDBox12.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label18
             // 
@@ -1118,6 +1160,7 @@
             this.companyIDBox11.Size = new System.Drawing.Size(73, 20);
             this.companyIDBox11.TabIndex = 28;
             this.companyIDBox11.Text = "K";
+            this.companyIDBox11.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label19
             // 
@@ -1135,6 +1178,7 @@
             this.companyIDBox10.Size = new System.Drawing.Size(73, 20);
             this.companyIDBox10.TabIndex = 26;
             this.companyIDBox10.Text = "J";
+            this.companyIDBox10.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label20
             // 
@@ -1152,6 +1196,7 @@
             this.companyIDBox09.Size = new System.Drawing.Size(73, 20);
             this.companyIDBox09.TabIndex = 24;
             this.companyIDBox09.Text = "I";
+            this.companyIDBox09.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label21
             // 
@@ -1169,6 +1214,7 @@
             this.companyIDBox08.Size = new System.Drawing.Size(73, 20);
             this.companyIDBox08.TabIndex = 22;
             this.companyIDBox08.Text = "H";
+            this.companyIDBox08.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label13
             // 
@@ -1186,6 +1232,7 @@
             this.companyIDBox07.Size = new System.Drawing.Size(73, 20);
             this.companyIDBox07.TabIndex = 20;
             this.companyIDBox07.Text = "G";
+            this.companyIDBox07.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label12
             // 
@@ -1203,6 +1250,7 @@
             this.companyIDBox06.Size = new System.Drawing.Size(73, 20);
             this.companyIDBox06.TabIndex = 18;
             this.companyIDBox06.Text = "F";
+            this.companyIDBox06.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label11
             // 
@@ -1220,6 +1268,7 @@
             this.companyIDBox05.Size = new System.Drawing.Size(73, 20);
             this.companyIDBox05.TabIndex = 16;
             this.companyIDBox05.Text = "E";
+            this.companyIDBox05.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label10
             // 
@@ -1237,6 +1286,7 @@
             this.companyIDBox04.Size = new System.Drawing.Size(73, 20);
             this.companyIDBox04.TabIndex = 14;
             this.companyIDBox04.Text = "D";
+            this.companyIDBox04.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label9
             // 
@@ -1254,6 +1304,7 @@
             this.companyIDBox03.Size = new System.Drawing.Size(73, 20);
             this.companyIDBox03.TabIndex = 12;
             this.companyIDBox03.Text = "C";
+            this.companyIDBox03.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label8
             // 
@@ -1271,6 +1322,7 @@
             this.companyIDBox02.Size = new System.Drawing.Size(73, 20);
             this.companyIDBox02.TabIndex = 10;
             this.companyIDBox02.Text = "B";
+            this.companyIDBox02.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label7
             // 
@@ -1288,6 +1340,7 @@
             this.companyIDBox01.Size = new System.Drawing.Size(73, 20);
             this.companyIDBox01.TabIndex = 8;
             this.companyIDBox01.Text = "A";
+            this.companyIDBox01.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label5
             // 
@@ -1305,6 +1358,7 @@
             this.patternTeamBox.Size = new System.Drawing.Size(266, 20);
             this.patternTeamBox.TabIndex = 5;
             this.patternTeamBox.Text = "{company}-{platoon}{section}/{team}";
+            this.patternTeamBox.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // patternSectionBox
             // 
@@ -1313,6 +1367,7 @@
             this.patternSectionBox.Size = new System.Drawing.Size(266, 20);
             this.patternSectionBox.TabIndex = 4;
             this.patternSectionBox.Text = "{company}-{platoon}{section}";
+            this.patternSectionBox.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // patternPlatoonBox
             // 
@@ -1321,6 +1376,7 @@
             this.patternPlatoonBox.Size = new System.Drawing.Size(266, 20);
             this.patternPlatoonBox.TabIndex = 3;
             this.patternPlatoonBox.Text = "{company}-{platoon}";
+            this.patternPlatoonBox.Leave += new System.EventHandler(this.onBox_Leave);
             // 
             // label4
             // 
@@ -1348,16 +1404,6 @@
             this.label2.Size = new System.Drawing.Size(46, 13);
             this.label2.TabIndex = 0;
             this.label2.Text = "Platoon:";
-            // 
-            // btnVerify
-            // 
-            this.btnVerify.Location = new System.Drawing.Point(6, 365);
-            this.btnVerify.Name = "btnVerify";
-            this.btnVerify.Size = new System.Drawing.Size(188, 23);
-            this.btnVerify.TabIndex = 42;
-            this.btnVerify.Text = "Verify";
-            this.btnVerify.UseVisualStyleBackColor = true;
-            this.btnVerify.Click += new System.EventHandler(this.btnVerify_Click);
             // 
             // btnFinish
             // 
@@ -1537,7 +1583,6 @@
         private System.Windows.Forms.TextBox platoonIDBoxCO;
         private System.Windows.Forms.GroupBox groupBox10;
         private System.Windows.Forms.TreeView oobView;
-        private System.Windows.Forms.Button btnVerify;
         private System.Windows.Forms.Button btnFinish;
     }
 }
