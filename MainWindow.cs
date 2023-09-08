@@ -34,6 +34,8 @@ namespace SBCM {
 
         Dictionary<Rectangle, object> _selectionRects = new Dictionary<Rectangle, object>();
 
+        bool _unsavedWork;
+
         public MainWindow() {
             InitializeComponent();
 
@@ -84,6 +86,8 @@ namespace SBCM {
             labelTeamHeader.Visible = false;
 
             mapPanelContextMenu.Enabled = false;
+
+            _unsavedWork = false;
 
             mapShowSelector.SelectedItem = mapShowSelector.Items[0];
         }
@@ -428,15 +432,19 @@ namespace SBCM {
 
         private void mapPanel_MouseMove(object sender, MouseEventArgs e) {
             if (_mouseDown) {
+                // Pan the map
+
                 Point curLoc = e.Location;
-                _mapAnchor = new Point(
-                    _mapAnchor.X + (int)((e.Location.X - _startPoint.X) / _scale),
-                    _mapAnchor.Y + (int)((e.Location.Y - _startPoint.Y) / _scale)
-                );
+                _mapAnchor.X += (int)((e.Location.X - _startPoint.X) / _scale);
+                _mapAnchor.Y += (int)((e.Location.Y - _startPoint.Y) / _scale);
+                _mapAnchor.X = Math.Max(-_mapImage.Width, Math.Min(0, _mapAnchor.X));
+                _mapAnchor.Y = Math.Max(-_mapImage.Height, Math.Min(0, _mapAnchor.Y));
                 _startPoint = curLoc;
 
                 mapPanel.Invalidate();
             }
+
+            // Update UTM coords under mouse
             if(_mapImage != null) {
                 MapImage map = _campaign.MapImage;
 
@@ -450,7 +458,6 @@ namespace SBCM {
                 labelUTMX.Text = "";
                 labelUTMY.Text = "";
             }
-
         }
 
         private void mapPanel_MouseDown(object sender, MouseEventArgs e) {
@@ -485,6 +492,7 @@ namespace SBCM {
 
         private void mapPanel_MouseUp(object sender, MouseEventArgs e) {
             if (e.Button == MouseButtons.Middle) {
+                // Stop map pan
                 _mouseDown = false;
             }
         }
@@ -585,6 +593,10 @@ namespace SBCM {
         }
 
         private void LoadCampaign(Campaign campaign) {
+            _campaign?.Dispose();
+
+            _unsavedWork = false;
+            
             _campaign = campaign;
             campaignName.Text = _campaign.Name;
             _mapImage = _campaign.MapImage.GetBitmap();
@@ -607,9 +619,19 @@ namespace SBCM {
         }
 
         private void newToolStripMenuItem_Click(object sender, EventArgs e) {
+            if(_unsavedWork) {
+                DialogResult dr = GiveOptionToSave();
+                if (dr == DialogResult.Yes) {
+                    SaveOrSaveAs();
+                } else if (dr == DialogResult.Cancel) {
+                    return;
+                }
+            }
+
             using (NewFromReport newFromReport = new NewFromReport()) {
                 if (newFromReport.ShowDialog() == DialogResult.OK) {
                     LoadCampaign(newFromReport.NewCampaign);
+                    _unsavedWork = true;
                 }
             }
         }
@@ -895,13 +917,15 @@ namespace SBCM {
 
         private void CenterMapOnUTM(int utm_x, int utm_y) {
             if (utm_x != -1 && utm_y != -1) {
-                _campaign.MapImage.UTMToImage(
-                    utm_x, utm_y,
-                    out float image_x, out float image_y
-                );
+                if (_campaign.MapImage.WithinUTMExtents(utm_x, utm_y)) {
+                    _campaign.MapImage.UTMToImage(
+                        utm_x, utm_y,
+                        out float image_x, out float image_y
+                    );
 
-                _mapAnchor.X = (int)-image_x;
-                _mapAnchor.Y = (int)-image_y;
+                    _mapAnchor.X = (int)-image_x;
+                    _mapAnchor.Y = (int)-image_y;
+                }
             }
         }
 
@@ -934,17 +958,40 @@ namespace SBCM {
             setCallsignTemplates.Dispose();
             PopulateOOBTree();
             mapPanel.Invalidate();
+
+            _unsavedWork = true;
         }
 
-        private void saveToolStripMenuItem_Click(object sender, EventArgs e) {
-            if(_currentCampaignFileName == "") {
+        private void SaveOrSaveAs() {
+            if (_currentCampaignFileName == "") {
                 SaveAs();
             } else {
                 Save();
             }
         }
 
+        private void saveToolStripMenuItem_Click(object sender, EventArgs e) {
+            SaveOrSaveAs();
+        }
+
+        private DialogResult GiveOptionToSave() {
+            return MessageBox.Show(
+                "You have unsaved edits. Do you want to save this campaign before continuing?",
+                "Unsaved edits",
+                MessageBoxButtons.YesNoCancel
+            );
+        }
+
         private void loadToolStripMenuItem_Click(object sender, EventArgs e) {
+            if(_unsavedWork) {
+                DialogResult dr = GiveOptionToSave();
+                if(dr == DialogResult.Yes) {
+                    SaveOrSaveAs();
+                } else if(dr == DialogResult.Cancel) {
+                    return;
+                }
+            }
+
             using (OpenFileDialog dialog = new OpenFileDialog()) {
                 dialog.Filter = "Campaigns (*.cam)|*.cam";
                 dialog.FilterIndex = 0;
@@ -990,6 +1037,8 @@ namespace SBCM {
         private void Save() {
             try {
                 _campaign.Serialize(_currentCampaignFileName);
+
+                _unsavedWork = false;
             } catch {
                 MessageBox.Show(
                     "Can't save the campaign file. Your hard drive may be out of space, or you might not have access to that folder.",
@@ -1011,11 +1060,24 @@ namespace SBCM {
 
         private void recalibrateMapImageToolStripMenuItem_Click(object sender, EventArgs e) {
             using(CalibrateMapImage cmi = new CalibrateMapImage(_campaign.MapImage)) {
-                cmi.ShowDialog();
+                if(cmi.ShowDialog() == DialogResult.OK) {
+                    _unsavedWork = true;
+                }
             }
         }
 
         private void MainWindow_FormClosing(object sender, FormClosingEventArgs e) {
+            if (_unsavedWork) {
+                DialogResult dr = GiveOptionToSave();
+                if (dr == DialogResult.Yes) {
+                    SaveOrSaveAs();
+                } else if (dr == DialogResult.Cancel) {
+                    e.Cancel = true;
+                    return;
+                }
+            }
+
+            _campaign?.Dispose();
             _mapTransform?.Dispose();
         }
 
@@ -1037,6 +1099,8 @@ namespace SBCM {
                     }
                     RebuildSelectionRects();
                     mapPanel.Invalidate();
+
+                    _unsavedWork = true;
                 }
             } catch {
                 // Ignore
@@ -1061,6 +1125,8 @@ namespace SBCM {
                     }
                     RebuildSelectionRects();
                     mapPanel.Invalidate();
+
+                    _unsavedWork = true;
                 }
             } catch {
                 // Ignore
@@ -1116,6 +1182,8 @@ namespace SBCM {
 
                 RebuildSelectionRects();
                 mapPanel.Invalidate();
+
+                _unsavedWork = true;
             }
         }
 

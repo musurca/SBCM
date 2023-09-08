@@ -38,103 +38,6 @@ namespace SBCM {
         }
     }
 
-    public class MapImage {
-        private Bitmap _image;
-
-        private string _imageDataString;
-        public string ImageDataString {
-            get {
-                if (
-                       _imageDataString == null
-                    || _imageDataString == ""
-                ) {
-                    _imageDataString = GetImageDataString();
-                }
-                return _imageDataString; 
-            }
-
-            set {
-                _imageDataString = value;
-                _image = DataFuncs.JPEGBytesToImage(
-                    DataFuncs.StringToBytes(_imageDataString)
-                );
-            }
-        }
-
-        public float UTM_Anchor_X { get; set; }
-        public float UTM_Anchor_Y { get; set; }
-
-        public float UTM_X_Step { get; set; }
-        public float UTM_Y_Step { get; set; }
-
-        public MapImage() {
-            _image = null;
-            _imageDataString = "";
-            SetUTMAnchor(0.0f, 0.0f);
-            SetUTMStep(0.0f, 0.0f);
-        }
-
-        public MapImage(string imageFilePath) {
-            _image = new Bitmap(imageFilePath);
-            _imageDataString = GetImageDataString();
-            // Reconstruct image from compressed version
-            _image = DataFuncs.JPEGBytesToImage(
-                DataFuncs.StringToBytes(_imageDataString)
-            );
-            SetUTMAnchor(0.0f, 0.0f);
-            SetUTMStep(0.0f, 0.0f);
-        }
-
-        private string GetImageDataString() {
-            return DataFuncs.BytesToString(
-                DataFuncs.ImageToJPEGBytes(_image)
-            );
-        }
-
-        public void ImageToUTM(Point imagePos, out int x, out int y) {
-            x = (int)(UTM_Anchor_X + UTM_X_Step * imagePos.X);
-            y = (int)(UTM_Anchor_Y + UTM_Y_Step * imagePos.Y);
-        }
-
-        public void UTMToImage(int utm_x, int utm_y, out float x, out float y) {
-            if (UTM_X_Step != 0.0f && UTM_Y_Step != 0.0f) {
-                x = ((utm_x - UTM_Anchor_X) / UTM_X_Step);
-                y = ((utm_y - UTM_Anchor_Y) / UTM_Y_Step);
-            } else {
-                x = y = 0.0f;
-            }
-        }
-
-        public Bitmap GetBitmap() {
-            return _image;
-        }
-
-        public static Bitmap DownloadBitmapFromURL(string url) {
-            Bitmap bitmap = null;
-
-            try {
-                WebRequest request = WebRequest.Create(url);
-                WebResponse response = request.GetResponse();
-                Stream responseStream = response.GetResponseStream();
-                bitmap = new Bitmap(responseStream);
-            } catch {
-                // TODO: some kind of error response to user
-            }
-
-            return bitmap;
-        }
-
-        public void SetUTMAnchor(float x, float y) {
-            UTM_Anchor_X = x;
-            UTM_Anchor_Y = y;
-        }
-
-        public void SetUTMStep(float x_step, float y_step) {
-            UTM_X_Step = x_step;
-            UTM_Y_Step = y_step;
-        }
-    }
-
     public class Campaign {
         private string _fileVersion = "0100";
         public string FileVersion {
@@ -196,6 +99,10 @@ namespace SBCM {
             ReadOnly = false;
 
             NextTurn(forces);
+        }
+
+        public void Dispose() {
+            MapImage?.Dispose();
         }
 
         private void ApplyCallsignTemplates() {

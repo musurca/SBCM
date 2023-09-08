@@ -103,6 +103,7 @@
       <DependentUpon>EnterUTMCoord.cs</DependentUpon>
     </Compile>
     <Compile Include="DataFuncs.cs" />
+    <Compile Include="MapImage.cs" />
     <Compile Include="NewFromReport.cs">
       <SubType>Form</SubType>
     </Compile>

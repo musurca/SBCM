@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
 using System.Drawing.Imaging;
+using static System.Net.Mime.MediaTypeNames;
 
 /*
  * https://stackoverflow.com/questions/25134897/gzip-compression-and-decompression-in-c-sharp
@@ -66,6 +67,7 @@ namespace SBCM {
             return null;
         }
 
+        // quality domain, from lowest to highest: [0L - 100L]
         public static EncoderParameters MakeImageEncoderParameters(Int64 quality) {
             var encoderParameters = new EncoderParameters(1);
             encoderParameters.Param[0] = new EncoderParameter(
@@ -75,8 +77,22 @@ namespace SBCM {
             return encoderParameters;
         }
 
-        public static byte[] ImageToJPEGBytes(Image img) {
-            using (var stream = new MemoryStream()) {
+        public static string BitmapToBase64(Bitmap img) {
+           return BytesToString(
+               ImageToJPEGBytes(img)
+           );
+        }
+
+        public static Bitmap Base64ToBitmap(string b64) {
+            return JPEGBytesToImage(
+                StringToBytes(b64)
+            );
+        }
+
+        public static byte[] ImageToJPEGBytes(System.Drawing.Image img) {
+            using (
+                var stream = new MemoryStream()
+            ) {
                 img.Save(
                     stream, 
                     GetImageEncoder(ImageFormat.Jpeg), 
@@ -95,8 +111,16 @@ namespace SBCM {
         }
 
         public static Bitmap JPEGBytesToImage(byte[] buffer) {
-            Image img = Image.FromStream(new MemoryStream(buffer));
-            Bitmap bitmap = new Bitmap(img);
+            Bitmap bitmap;
+            using (
+                var stream = new MemoryStream(buffer)
+            ) {
+                System.Drawing.Image img = System.Drawing.Image.FromStream(
+                    stream
+                );
+                bitmap = new Bitmap(img);
+            }
+            
             return bitmap;
         }
     }
