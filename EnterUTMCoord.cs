@@ -23,17 +23,37 @@ namespace SBCM {
         }
 
         private void utmXBox_KeyPress(object sender, KeyPressEventArgs e) {
-            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar)) {
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar) && e.KeyChar != '-') {
                 e.Handled = true;
             }
+            if(e.KeyChar == '-' && ((TextBox)(sender)).Text.IndexOf('-') != -1) {
+                e.Handled = true;
+            }
+
             VerifyInput();
         }
 
         private void btnOK_Click(object sender, EventArgs e) {
-            UTM_X = int.Parse(utmXBox.Text);
-            UTM_Y = int.Parse(utmYBox.Text);
+            int valid_utms = 0;
 
-            DialogResult = DialogResult.OK;
+            try {
+                UTM_X = int.Parse(utmXBox.Text);
+                valid_utms++;
+            } catch {
+                utmXBox.Text = "";
+            }
+            try {
+                UTM_Y = int.Parse(utmYBox.Text);
+                valid_utms++;
+            } catch {
+                utmYBox.Text = "";
+            }
+
+            if (valid_utms == 2) {
+                DialogResult = DialogResult.OK;
+            } else {
+                VerifyInput();
+            }
         }
     }
 }

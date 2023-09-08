@@ -976,8 +976,8 @@ namespace SBCM {
 
         private DialogResult GiveOptionToSave() {
             return MessageBox.Show(
-                "You have unsaved edits. Do you want to save this campaign before continuing?",
-                "Unsaved edits",
+                "You have unsaved changes. Do you want to save this campaign before continuing?",
+                "Unsaved changes",
                 MessageBoxButtons.YesNoCancel
             );
         }
