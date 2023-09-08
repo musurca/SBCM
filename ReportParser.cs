@@ -123,10 +123,11 @@ namespace SBCM {
                         string playerName = playerForceString.Replace(" (" + playerForceName + ")", "");
 
                         Force playerForce = scenarioForces[playerForceName];
+                        bool oldPlayer = true;
                         Player player = playerForce.FindPlayer(playerName);
                         if (player == null) {
+                            oldPlayer = false;
                             player = new Player(playerName);
-                            playerForce.AddPlayer(player);
                         }
 
                         HtmlNode playerStatsTable = NextSiblingElement(playerForceNode);
@@ -191,6 +192,13 @@ namespace SBCM {
                             }
                         }
 
+                        if (!oldPlayer) {
+                            // Don't add a single player who hasn't fired in a campaign initialization
+                            if (!campaignInitializing || numPlayers > 1 || (player.ShotsTaken > 0)) {
+                                playerForce.AddPlayer(player);
+                            }
+                        }
+
                         head = playerStatsTable;
                     }
                 } else if (header.InnerHtml.Equals("Unit Information")) {
@@ -222,17 +230,19 @@ namespace SBCM {
 
                                 Unit unit = currentForce.GetUnit(unitCallsign);
                                 if (unit != null) {
-                                    // TODO handle this case better
-                                    Debug.Assert(
-                                        unit.Unit_Class == unitClass && unit.Type == unitType,
-                                        $"Unit {unitCallsign}/{unitType}/{unitClass} does not match {unit.Callsign}/{unit.Type}/{unit.Unit_Class}"
-                                    );
+                                    if(unit.Unit_Class != unitClass || unit.Type != unitType) {
+                                        // replace existing unit with new unit
+                                        // TODO should we warn user?
+                                        unit.Initialize();
+                                        unit.Force = forceName;
+                                        unit.Callsign = unitCallsign;
+                                        unit.Type = unitType;
+                                        unit.Unit_Class = unitClass;
+                                    }
                                 } else {
                                     unit = new Unit(forceName, unitCallsign, unitType, unitClass);
                                     currentForce.AddUnit(unit);
                                 }
-
-                                //Console.WriteLine($"{unit.Callsign}: {unit.Company} company, {unit.Platoon} platoon, {unit.Section} section, {unit.Team} team - CO: {unit.CO} XO: {unit.XO}");
 
                                 if (campaignInitializing) {
                                     unit.Strength_Maximum = int.Parse(unitColumns.ElementAt(3).InnerHtml);
@@ -304,8 +314,8 @@ namespace SBCM {
                         // Set last-known damage state of the unit
                         DamageState state = target.GetDamageState();
 
-                        bool newlyDestroyed = eventColumns.ElementAt(12).InnerHtml == "X";
-                        bool newlyImmobilized = eventColumns.ElementAt(13).InnerHtml == "X";
+                        bool newlyDestroyed = !state.Destroyed && eventColumns.ElementAt(12).InnerHtml == "X";
+                        bool newlyImmobilized = !state.Immobilized && eventColumns.ElementAt(13).InnerHtml == "X";
 
                         state.Destroyed = state.Destroyed || newlyDestroyed || (target.Strength_Current == 0);
                         state.Immobilized = state.Immobilized || newlyImmobilized;
@@ -354,17 +364,9 @@ namespace SBCM {
                 }
             }
 
+            /*
             foreach(Force f in scenarioForces.Values) {
                 f.EstimatePositions();
-            }
-            /*
-            using (StreamWriter writer = new StreamWriter("units.csv")) {
-                writer.WriteLine(Unit.SerializeToCSVColumnHeadings());
-                foreach (Force f in scenarioForces.Values) {
-                    foreach (Unit unit in f.GetUnitList()) {
-                        writer.WriteLine(unit.SerializeToCSVRow());
-                    }
-                }
             }
             */
 

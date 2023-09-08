@@ -98,7 +98,7 @@ namespace SBCM {
             Initialize();
         }
 
-        private void Initialize() {
+        public void Initialize() {
             Strength_Current = 0;
             Strength_Maximum = 0;
 

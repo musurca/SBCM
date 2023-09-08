@@ -13,29 +13,51 @@ namespace SBCM {
     public class Turn { 
         public int Index { get; set; }
         public Dictionary<string, Force> Forces;
+        public DateTime CurrentTime; 
 
         public Turn() {
         }
 
-        public Turn(int index, Dictionary<string, Force> forces) {
+        public Turn(int index, DateTime curTime, Dictionary<string, Force> forces) {
             Index = index;
+            CurrentTime = curTime;
             Forces = forces;
+        }
+
+        public Dictionary <string, Force> CloneForces() {
+            // Deep copy all forces in turn, but strip events
+            Dictionary<string, Force> clonedForces = JsonConvert.DeserializeObject<Dictionary<string, Force>>(
+                JsonConvert.SerializeObject(Forces)
+            );
+
+            foreach(Force f in clonedForces.Values) {
+                f.ClearEvents();
+            }
+
+            return clonedForces;
         }
     }
 
     public class MapImage {
         private Bitmap _image;
-        private string _imageURL;
-        public string ImageURL {
+
+        private string _imageDataString;
+        public string ImageDataString {
             get {
-                return _imageURL;
+                if (
+                       _imageDataString == null
+                    || _imageDataString == ""
+                ) {
+                    _imageDataString = GetImageDataString();
+                }
+                return _imageDataString; 
             }
 
             set {
-                _imageURL = value;
-                if (_imageURL != "") {
-                    _image = DownloadBitmapFromURL(_imageURL);
-                }
+                _imageDataString = value;
+                _image = DataFuncs.JPEGBytesToImage(
+                    DataFuncs.StringToBytes(_imageDataString)
+                );
             }
         }
 
@@ -45,11 +67,28 @@ namespace SBCM {
         public float UTM_X_Step { get; set; }
         public float UTM_Y_Step { get; set; }
 
-        public MapImage(string imageURL) {
+        public MapImage() {
             _image = null;
-            ImageURL = imageURL;
+            _imageDataString = "";
             SetUTMAnchor(0.0f, 0.0f);
             SetUTMStep(0.0f, 0.0f);
+        }
+
+        public MapImage(string imageFilePath) {
+            _image = new Bitmap(imageFilePath);
+            _imageDataString = GetImageDataString();
+            // Reconstruct image from compressed version
+            _image = DataFuncs.JPEGBytesToImage(
+                DataFuncs.StringToBytes(_imageDataString)
+            );
+            SetUTMAnchor(0.0f, 0.0f);
+            SetUTMStep(0.0f, 0.0f);
+        }
+
+        private string GetImageDataString() {
+            return DataFuncs.BytesToString(
+                DataFuncs.ImageToJPEGBytes(_image)
+            );
         }
 
         public void ImageToUTM(Point imagePos, out int x, out int y) {
@@ -57,12 +96,12 @@ namespace SBCM {
             y = (int)(UTM_Anchor_Y + UTM_Y_Step * imagePos.Y);
         }
 
-        public void UTMToImage(int utm_x, int utm_y, out int x, out int y) {
+        public void UTMToImage(int utm_x, int utm_y, out float x, out float y) {
             if (UTM_X_Step != 0.0f && UTM_Y_Step != 0.0f) {
-                x = (int)((utm_x - UTM_Anchor_X) / UTM_X_Step);
-                y = (int)((utm_y - UTM_Anchor_Y) / UTM_Y_Step);
+                x = ((utm_x - UTM_Anchor_X) / UTM_X_Step);
+                y = ((utm_y - UTM_Anchor_Y) / UTM_Y_Step);
             } else {
-                x = y = 0;
+                x = y = 0.0f;
             }
         }
 
@@ -97,6 +136,20 @@ namespace SBCM {
     }
 
     public class Campaign {
+        private string _fileVersion = "0100";
+        public string FileVersion {
+            get {
+                return _fileVersion;
+            }
+
+            set {
+                if(value != _fileVersion) {
+                    // TODO for future version changes
+                }
+                _fileVersion = value;
+            }
+        }
+
         public string Name { get; set; }
         public MapImage MapImage { get; set; }
         public DateTime StartDate { get; set; }
@@ -176,9 +229,23 @@ namespace SBCM {
             }
         }
 
-        public void NextTurn(Dictionary<string, Force> forces) {
+        public void NextTurn(Dictionary<string, Force> forces, int minutesAdd = 0) {
             int index = Turns.Count;
-            Turns.Add(new Turn(index, forces));
+            DateTime newTime = StartDate.AddMinutes(minutesAdd);
+
+            Turns.Add(new Turn(index, newTime, forces));
+            ApplyCallsignTemplates();
+        }
+
+        public Turn GetTurn(int index) {
+            if (Turns.Count > 0) {
+                foreach(Turn t in Turns) {
+                    if (t.Index == index) {
+                        return t;
+                    }
+                }
+            }
+            return null;
         }
 
         public Turn GetLastTurn() {
@@ -188,15 +255,49 @@ namespace SBCM {
             return null;
         }
 
+        public Campaign CloneForSide(string sideName) {
+            Campaign cloneCampaign = JsonConvert.DeserializeObject<Campaign>(
+                JsonConvert.SerializeObject(this)
+            );
+
+            // Remove data for all other sides other than the one specified
+            List<string> otherForces = new List<string>();
+
+            foreach(string key in cloneCampaign._callsignTemplates.Keys) {
+                if(key != sideName) {
+                    otherForces.Add(key);
+                }
+            }
+            foreach(string key in otherForces) {
+                cloneCampaign._callsignTemplates.Remove(key);
+            }
+            foreach(Turn t in cloneCampaign.Turns) {
+                otherForces.Clear();
+
+                foreach (string key in t.Forces.Keys) {
+                    if (key != sideName) {
+                        otherForces.Add(key);
+                    }
+                }
+
+                foreach(string key in otherForces) {
+                    t.Forces.Remove(key);
+                }
+            }
+            cloneCampaign.ApplyCallsignTemplates();
+
+            return cloneCampaign;
+        }
+
         public void Serialize(string filepath) {
             string json = JsonConvert.SerializeObject(this);
-            File.WriteAllText(filepath, GZip.Compress(json));
+            File.WriteAllText(filepath, DataFuncs.Compress(json));
         }
 
         public static Campaign Deserialize(string filepath) {
             string gzjson = File.ReadAllText(filepath);
             Campaign cam = JsonConvert.DeserializeObject<Campaign>(
-                GZip.Decompress(gzjson)
+                DataFuncs.Decompress(gzjson)
             );
             cam.ApplyCallsignTemplates();
             return cam;

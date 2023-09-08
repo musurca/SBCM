@@ -114,6 +114,13 @@ namespace SBCM {
             UTM_X = u_x;
             UTM_Y = u_y;
 
+            foreach(Unit u in Members) {
+                if(u.UTM_X == -1 || u.UTM_Y == -1) {
+                    u.UTM_X = UTM_X;
+                    u.UTM_Y = UTM_Y;
+                }
+            }
+
             foreach (Section s in Sections.Values) {
                 s.UpdatePosition();
             }
@@ -396,6 +403,10 @@ namespace SBCM {
             return Events;
         }
 
+        public void ClearEvents() {
+            Events.Clear();
+        }
+
         public bool GenerateCallsign(
             out string callsign,
             string company,
@@ -440,6 +451,7 @@ namespace SBCM {
             foreach (Unit u in Units.Values) {
                 AddUnitToBattalion(u);
             }
+            EstimatePositions();
         }
 
         public List<Unit> GetUnitList() {

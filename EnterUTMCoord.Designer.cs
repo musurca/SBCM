@@ -59,7 +59,7 @@
             this.utmXBox.MaxLength = 8;
             this.utmXBox.Name = "utmXBox";
             this.utmXBox.Size = new System.Drawing.Size(74, 20);
-            this.utmXBox.TabIndex = 0;
+            this.utmXBox.TabIndex = 1;
             this.utmXBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.utmXBox.WordWrap = false;
             this.utmXBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.utmXBox_KeyPress);
@@ -70,7 +70,7 @@
             this.utmYBox.MaxLength = 8;
             this.utmYBox.Name = "utmYBox";
             this.utmYBox.Size = new System.Drawing.Size(74, 20);
-            this.utmYBox.TabIndex = 1;
+            this.utmYBox.TabIndex = 2;
             this.utmYBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.utmYBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.utmXBox_KeyPress);
             // 
@@ -92,7 +92,7 @@
             this.btnCancel.Location = new System.Drawing.Point(12, 66);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
-            this.btnCancel.TabIndex = 3;
+            this.btnCancel.TabIndex = 4;
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
             // 
@@ -102,7 +102,7 @@
             this.btnOK.Location = new System.Drawing.Point(182, 66);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(75, 23);
-            this.btnOK.TabIndex = 2;
+            this.btnOK.TabIndex = 3;
             this.btnOK.Text = "OK";
             this.btnOK.UseVisualStyleBackColor = true;
             this.btnOK.Click += new System.EventHandler(this.btnOK_Click);

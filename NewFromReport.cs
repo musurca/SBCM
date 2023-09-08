@@ -16,6 +16,7 @@ namespace SBCM {
         public NewFromReport() {
             InitializeComponent();
             NewCampaign = null;
+            campaignTime.ShowUpDown = true;
         }
 
         private void NewFromReport_Load(object sender, EventArgs e) {
@@ -82,14 +83,24 @@ namespace SBCM {
                     forces
                 );
             } catch {
-                // TODO: error message: can't parse battle report!
+                MessageBox.Show(
+                    "Couldn't load the report file. Make sure that you've selected a valid Steel Beasts after-action battle report (.HTM file).",
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
                 EnableInput();
                 return;
             }
 
             MapImage mapImage = new MapImage(mapImageURL.Text);
             if (mapImage.GetBitmap() == null) {
-                // TODO: error message : can't load image from URL!
+                MessageBox.Show(
+                    "Couldn't load the image. Check that the URL is correct, and that your internet connection is working.",
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
                 mapImageURL.Text = "";
                 EnableInput();
                 return;
@@ -102,10 +113,14 @@ namespace SBCM {
                 }
             }
 
+            // Combine date and time
+            DateTime campaignDateTime = campaignDate.Value.Date +
+                    campaignTime.Value.TimeOfDay;
+
             if (forces.Count > 0) {
                 NewCampaign = new Campaign(
                     campaignName.Text,
-                    campaignDate.Value,
+                    campaignDateTime,
                     mapImage,
                     forces
                 );
@@ -120,8 +135,31 @@ namespace SBCM {
 
                 
             } else {
-                // TODO: error message: no valid forces found in report!
+                MessageBox.Show(
+                    "Couldn't find any sides in the battle report!",
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
                 EnableInput();
+            }
+        }
+
+        private void btnSelectImage_Click(object sender, EventArgs e) {
+            using (
+                OpenFileDialog dialog = new OpenFileDialog()
+            ) {
+                dialog.Filter = "Image files (*.png,*.jpg,*.bmp,*.tif)|*.png;*.jpg;*.bmp;*.tif";
+                dialog.FilterIndex = 0;
+                dialog.RestoreDirectory = true;
+
+                // Show the dialog and check if the user clicked OK
+                if (dialog.ShowDialog() == DialogResult.OK) {
+                    // Retrieve the selected folder path
+                    mapImageURL.Text = dialog.FileName;
+
+                    VerifyCanProceed();
+                }
             }
         }
     }

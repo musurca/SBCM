@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Windows.Forms.VisualStyles;
 
 namespace SBCM {
     public class CallsignParser {
@@ -37,6 +38,16 @@ namespace SBCM {
         public string[] SymbolsPlatoonList;
         public string[] SymbolsSectionList;
         public string[] SymbolsTeamList;
+
+        private string _longestPossibleCallsign = "";
+        public string LongestPossibleCallsign {
+            get {
+                if(_longestPossibleCallsign.Length == 0) {
+                    CalculateLongestPossibleCallsign();
+                }
+                return _longestPossibleCallsign;
+            }
+        }
 
         public CallsignParser() {
 
@@ -77,6 +88,32 @@ namespace SBCM {
             SymbolCompanyXO = symbol_company_xo;
             SymbolPlatoonCO = symbol_platoon_co;
             SymbolPlatoonXO = symbol_platoon_xo;
+        }
+
+        private void CalculateLongestPossibleCallsign() {
+            string LongestStringInList(string[] strs) {
+                string ret = "";
+                foreach (string str in strs) {
+                    if (str.Length > ret.Length) {
+                        ret = str;
+                    }
+                }
+                return ret;
+            }
+
+            string longest_pattern = PatternPlatoon.Length > PatternSection.Length
+                ? (PatternPlatoon.Length > PatternTeam.Length ? PatternPlatoon : PatternTeam)
+                : (PatternSection.Length > PatternTeam.Length ? PatternSection : PatternTeam);
+
+            string longest_company = LongestStringInList(SymbolsCompanyList);
+            string longest_platoon = LongestStringInList(SymbolsPlatoonList);
+            string longest_section = LongestStringInList(SymbolsSectionList);
+            string longest_team = LongestStringInList(SymbolsTeamList);
+
+            _longestPossibleCallsign = longest_pattern.Replace(MARKER_COMPANY, longest_company)
+                .Replace(MARKER_PLATOON, longest_platoon)
+                .Replace(MARKER_SECTION, longest_section)
+                .Replace(MARKER_TEAM, longest_team);
         }
 
         public bool BuildCallsign(
