@@ -53,7 +53,8 @@ namespace SBCM {
 
             campaignName.Text = "";
             campaignDate.Text = "";
-            turnCounter.Text = "";
+            turnCounter.Items.Clear();
+            turnCounter.Enabled = false;
             labelUTMX.Text = "";
             labelUTMY.Text = "";
 
@@ -118,6 +119,21 @@ namespace SBCM {
                 return _oobToUnit[selected];
             }
             return null;
+        }
+
+        private void PopulateTurnCounter() {
+            List<Turn> allTurns = _campaign.Turns;
+            turnCounter.BeginUpdate();
+            turnCounter.Items.Clear();
+            foreach(Turn t in allTurns) {
+                if(t.Index == 0) {
+                    turnCounter.Items.Add("Setup Phase");
+                } else {
+                    turnCounter.Items.Add($"Turn {t.Index}");
+                }
+            }
+            turnCounter.EndUpdate();
+            turnCounter.Enabled = turnCounter.Items.Count > 1;
         }
 
         private void PopulateOOBTree() {
@@ -546,12 +562,8 @@ namespace SBCM {
                 DateTimeFormat.GetMonthName(turnTime.Month);
 
             campaignDate.Text = $"{month} {turnTime.Day}, {turnTime.Year} {turnTime.ToString("HH:mm")}";
-            turnCounter.Text = curTurn.Index == 0
-                ? "Setup Phase"
-                : $"Turn {curTurn.Index}";
 
             _forces = curTurn.Forces;
-
 
             string currentForceName = "";
             if(forceSelector.SelectedItem != null) {
@@ -568,6 +580,7 @@ namespace SBCM {
                 forceSelector.SelectedItem = currentForceName;
             }
 
+            SelectUnit(null, false);
             RefreshForce();
         }
 
@@ -588,8 +601,9 @@ namespace SBCM {
 
             btnMapExport.Enabled = true;
 
+            PopulateTurnCounter();
             Turn curTurn = _campaign.GetLastTurn();
-            LoadTurn(curTurn);
+            turnCounter.SelectedItem = turnCounter.Items[curTurn.Index];
         }
 
         private void newToolStripMenuItem_Click(object sender, EventArgs e) {
@@ -603,7 +617,8 @@ namespace SBCM {
         private void nextTurnFromReportToolStripMenuItem_Click(object sender, EventArgs e) {
             using (NextTurnFromReport nextTurnDialog = new NextTurnFromReport(_campaign)) {
                 if (nextTurnDialog.ShowDialog() == DialogResult.OK) {
-                    LoadTurn(_campaign.GetLastTurn());
+                    PopulateTurnCounter();
+                    turnCounter.SelectedItem = turnCounter.Items[turnCounter.Items.Count - 1];
                 }
             }
         }
@@ -1219,6 +1234,11 @@ namespace SBCM {
             using(AboutSBCM aboutDialog = new AboutSBCM()) {
                 aboutDialog.ShowDialog();
             }
+        }
+
+        private void turnCounter_SelectedIndexChanged(object sender, EventArgs e) {
+            int index = turnCounter.Items.IndexOf(turnCounter.SelectedItem);
+            LoadTurn(_campaign.GetTurn(index));
         }
     }
 }
