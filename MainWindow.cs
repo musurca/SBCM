@@ -15,7 +15,11 @@ namespace SBCM {
         Bitmap _mapImage;
         Point _mapAnchor;
         Point _mapCenter;
-        bool _mouseDown;
+        bool _mousePanning;
+        bool _mouseMeasuring;
+
+        Point _measureUTM_0;
+        Point _measureUTM_1;
 
         Point _startPoint;
 
@@ -36,6 +40,22 @@ namespace SBCM {
 
         bool _unsavedWork;
 
+        // Brushes
+        Pen _whitePen = new Pen(Color.White);
+        Pen _redPen = new Pen(Color.Red, 2.0f);
+        Pen _explosionOutline = new Pen(Color.MediumVioletRed);
+        Pen _measurePen = new Pen(Color.Gray, 2.0f);
+        SolidBrush _blackBrush = new SolidBrush(Color.Black);
+        SolidBrush _whiteBrush = new SolidBrush(Color.White);
+        SolidBrush _selectedBrush = new SolidBrush(Color.CornflowerBlue);
+        SolidBrush _deadBrush = new SolidBrush(Color.Gray);
+        SolidBrush _deadSelectBrush = new SolidBrush(Color.DarkGray);
+        SolidBrush _damagedBrush = new SolidBrush(Color.DarkGoldenrod);
+        SolidBrush _damageSelectBrush = new SolidBrush(Color.Goldenrod);
+        SolidBrush _blockBrush = new SolidBrush(Color.DarkBlue);
+        SolidBrush _fontBrush = new SolidBrush(Color.White);
+        SolidBrush _explosionBrush = new SolidBrush(Color.Red);
+
         public MainWindow() {
             InitializeComponent();
 
@@ -51,7 +71,14 @@ namespace SBCM {
 
             _mapImage = null;
             _scale = 1.0f;
-            _mouseDown = false;
+            _mousePanning = false;
+            _mouseMeasuring = false;
+
+            _mapAnchor = new Point();
+            _mapCenter = new Point();
+            _selectedUTMCoord = new Point();
+            _measureUTM_0 = new Point();
+            _measureUTM_1 = new Point();
 
             campaignName.Text = "";
             campaignDate.Text = "";
@@ -63,10 +90,8 @@ namespace SBCM {
             _currentCampaignFileName = "";
 
             Rectangle rect = mapPanel.ClientRectangle;
-            _mapCenter = new Point(
-                rect.Left + (int)((rect.Right - rect.Left) * 0.5),
-                rect.Top + (int)((rect.Bottom - rect.Top) * 0.5)
-            );
+            _mapCenter.X = rect.Left + (int)((rect.Right - rect.Left) * 0.5);
+            _mapCenter.Y = rect.Top + (int)((rect.Bottom - rect.Top) * 0.5);
 
             _oobToUnit = new Dictionary<string, object>();
             ammoGrid.ClearSelection();
@@ -240,18 +265,10 @@ namespace SBCM {
                 float halfCounterWidth = counterWidth / 2.0f;
                 float halfCounterHeight = counterHeight / 2.0f;
 
-                Pen whitePen = new Pen(Color.White);
-                SolidBrush selectedBrush = new SolidBrush(Color.CornflowerBlue);
-                SolidBrush deadBrush = new SolidBrush(Color.Gray);
-                SolidBrush deadSelectBrush = new SolidBrush(Color.DarkGray);
-                SolidBrush damagedBrush = new SolidBrush(Color.DarkGoldenrod);
-                SolidBrush damageSelectBrush = new SolidBrush(Color.Goldenrod);
-                SolidBrush blockBrush = new SolidBrush(Color.DarkBlue);
-                SolidBrush fontBrush = new SolidBrush(Color.White);
                 if (mapViewSelect == "Platoons") {
                     foreach (Company c in currentForce.Hierarchy.Companies.Values) {
                         foreach (Platoon p in c.Platoons.Values) {
-                            SolidBrush brush = _selectedUnit == p ? selectedBrush : blockBrush;
+                            SolidBrush brush = _selectedUnit == p ? _selectedBrush : _blockBrush;
                             if (p.UTM_X != -1 && p.UTM_Y != -1) {
                                 map.UTMToImage(
                                     p.UTM_X, p.UTM_Y,
@@ -266,7 +283,7 @@ namespace SBCM {
                                 );
 
                                 g.DrawRectangle(
-                                    whitePen,
+                                    _whitePen,
                                     x_pos - halfCounterWidth - 1.0f,
                                     y_pos - halfCounterHeight - 1.0f,
                                     counterWidth + 2.0f, counterHeight + 2.0f
@@ -284,7 +301,7 @@ namespace SBCM {
 
                                 g.DrawString(
                                     callsign,
-                                    SystemFonts.DefaultFont, fontBrush,
+                                    SystemFonts.DefaultFont, _fontBrush,
                                     x_pos - callSize.Width / 2.0f,
                                     y_pos - callSize.Height / 2.0f
                                 );
@@ -296,20 +313,20 @@ namespace SBCM {
                         SolidBrush brush = _selectedUnit == u
                             ? (
                                 u.Damage.Destroyed
-                                ? deadSelectBrush
+                                ? _deadSelectBrush
                                 : (
                                     u.Damage.IsDamaged()
-                                    ? damageSelectBrush
-                                    : selectedBrush
+                                    ? _damageSelectBrush
+                                    : _selectedBrush
                                   )
                                )
                             : (
                                 u.Damage.Destroyed
-                                ? deadBrush
+                                ? _deadBrush
                                 : (
                                    u.Damage.IsDamaged()
-                                   ? damagedBrush
-                                   : blockBrush
+                                   ? _damagedBrush
+                                   : _blockBrush
                                   )
                               );
 
@@ -327,7 +344,7 @@ namespace SBCM {
                             );
 
                             g.DrawRectangle(
-                                whitePen,
+                                _whitePen,
                                 x_pos - halfCounterWidth - 1.0f,
                                 y_pos - halfCounterHeight - 1.0f,
                                 counterWidth + 2.0f, counterHeight + 2.0f
@@ -340,7 +357,7 @@ namespace SBCM {
 
                             g.DrawString(
                                 u.Callsign,
-                                SystemFonts.DefaultFont, fontBrush,
+                                SystemFonts.DefaultFont, _fontBrush,
                                 x_pos - callSize.Width / 2.0f,
                                 y_pos - callSize.Height / 2.0f
                            );
@@ -359,40 +376,36 @@ namespace SBCM {
                         out float to_x_pos, out float to_y_pos
                     );
 
-                    using (
-                        Pen redPen = new Pen(Color.Red, 2.0f)
-                    ) {
-                        Pen explosionOutline = new Pen(Color.MediumVioletRed);
-                        Brush explosionBrush = new SolidBrush(Color.Red);
-
-                        g.DrawLine(redPen, from_x_pos, from_y_pos, to_x_pos, to_y_pos);
-                        g.DrawEllipse(explosionOutline, to_x_pos - 5.0f, to_y_pos - 5.0f, 10.0f, 10.0f);
-                        g.FillEllipse(explosionBrush, to_x_pos - 5.0f, to_y_pos - 5.0f, 10.0f, 10.0f);
-
-                        explosionOutline.Dispose();
-                        explosionBrush.Dispose();
-                    }
+                    g.DrawLine(_redPen, from_x_pos, from_y_pos, to_x_pos, to_y_pos);
+                    g.DrawEllipse(_explosionOutline, to_x_pos - 5.0f, to_y_pos - 5.0f, 10.0f, 10.0f);
+                    g.FillEllipse(_explosionBrush, to_x_pos - 5.0f, to_y_pos - 5.0f, 10.0f, 10.0f);
                 }
-
-                // Dispose of brushes
-                selectedBrush.Dispose();
-                blockBrush.Dispose();
-                fontBrush.Dispose();
-                deadBrush.Dispose();
-                deadSelectBrush.Dispose();
-                damagedBrush.Dispose();
-                damageSelectBrush.Dispose();
-                whitePen.Dispose();
             }
+        }
+
+        private void DisposeOfBrushes() {
+            // Dispose of brushes
+            _blackBrush.Dispose();
+            _whiteBrush.Dispose();
+            _selectedBrush.Dispose();
+            _blockBrush.Dispose();
+            _fontBrush.Dispose();
+            _deadBrush.Dispose();
+            _deadSelectBrush.Dispose();
+            _damagedBrush.Dispose();
+            _damageSelectBrush.Dispose();
+            _whitePen.Dispose();
+            _redPen.Dispose();
+            _measurePen.Dispose();
+            _explosionOutline.Dispose();
+            _explosionBrush.Dispose();
         }
 
         private void panel1_Paint(object sender, PaintEventArgs e) {
             Graphics g = e.Graphics;
             g.SmoothingMode = SmoothingMode.AntiAlias;
 
-            using (SolidBrush blackBrush = new SolidBrush(Color.Black)) {
-                g.FillRectangle(blackBrush, mapPanel.ClientRectangle);
-            }
+            g.FillRectangle(_blackBrush, mapPanel.ClientRectangle);
 
             if (_mapImage != null) {
                 // Center map, scale by zoom, then move to anchor
@@ -406,32 +419,90 @@ namespace SBCM {
                 _mapTransform.Invert();
 
                 // Draw the map
-                using (Pen whitePen = new Pen(Color.White)) {
-                    // Border
-                    g.DrawRectangle(
-                        whitePen,
-                        -5.0f,
-                        -5.0f,
-                        _mapImage.Width + 10.0f,
-                        _mapImage.Height + 10.0f
-                    );
-                }
+                // Border
+                g.DrawRectangle(
+                    _whitePen,
+                    -5.0f,
+                    -5.0f,
+                    _mapImage.Width + 10.0f,
+                    _mapImage.Height + 10.0f
+                );
 
                 DrawMapToGraphics(_campaign.MapImage, g);
+                
+                if(_mouseMeasuring) {
+                    _campaign.MapImage.UTMToImage(
+                        _measureUTM_0.X, 
+                        _measureUTM_0.Y, 
+                        out float x0, 
+                        out float y0
+                    );
+
+                    _campaign.MapImage.UTMToImage(
+                        _measureUTM_1.X,
+                        _measureUTM_1.Y,
+                        out float x1,
+                        out float y1
+                    );
+
+                    int dist_x = _measureUTM_1.X - _measureUTM_0.X;
+                    int dist_y = _measureUTM_1.Y - _measureUTM_0.Y;
+
+                    int dist_m = (int)Math.Round(
+                        10*Math.Sqrt(dist_x*dist_x + dist_y*dist_y)
+                    );
+
+                    string distStr = $"{dist_m} m";
+
+                    SizeF distStrSize = g.MeasureString(
+                        distStr,
+                        SystemFonts.DefaultFont
+                    );
+
+                    g.DrawLine(_measurePen, x0, y0, x1, y1);
+                    g.DrawString(
+                        distStr, 
+                        SystemFonts.DefaultFont, 
+                        _whiteBrush, 
+                        x1-distStrSize.Width*0.5f, 
+                        y1-distStrSize.Height-2.0f
+                    );
+                }
             }
         }
 
+        private Point _originPt;
+        private Point[] _tempTransformPts;
         private Point PanelToImage(Point panelPoint) {
             if (_mapTransform != null) {
-                Point[] transPt = new Point[] { panelPoint };
-                _mapTransform.TransformPoints(transPt);
-                return transPt[0];
+                if(_tempTransformPts == null) {
+                    _originPt = new Point(0, 0);
+                    _tempTransformPts = new Point[1];
+                }
+                _tempTransformPts[0] = panelPoint;
+                _mapTransform.TransformPoints(_tempTransformPts);
+                return _tempTransformPts[0];
             }
-            return new Point(0, 0);
+            _originPt.X = 0;
+            _originPt.Y = 0;
+            return _originPt;
         }
 
         private void mapPanel_MouseMove(object sender, MouseEventArgs e) {
-            if (_mouseDown) {
+            if(_mapImage == null) {
+                labelUTMX.Text = "";
+                labelUTMY.Text = ""; 
+                return; 
+            }
+
+            MapImage map = _campaign.MapImage;
+
+            map.ImageToUTM(
+                PanelToImage(e.Location),
+                out int utm_x, out int utm_y
+            );
+
+            if (_mousePanning) {
                 // Pan the map
 
                 Point curLoc = e.Location;
@@ -440,31 +511,27 @@ namespace SBCM {
                 _mapAnchor.X = Math.Max(-_mapImage.Width, Math.Min(0, _mapAnchor.X));
                 _mapAnchor.Y = Math.Max(-_mapImage.Height, Math.Min(0, _mapAnchor.Y));
                 _startPoint = curLoc;
+            }
+            
+            if(_mouseMeasuring) {
+                _measureUTM_1.X = utm_x;
+                _measureUTM_1.Y = utm_y;
+            }
 
+            if(_mousePanning || _mouseMeasuring) {
                 mapPanel.Invalidate();
             }
 
             // Update UTM coords under mouse
-            if(_mapImage != null) {
-                MapImage map = _campaign.MapImage;
-
-                map.ImageToUTM(
-                    PanelToImage(e.Location), 
-                    out int utm_x, out int utm_y
-                );
-                labelUTMX.Text = utm_x.ToString();
-                labelUTMY.Text = utm_y.ToString();
-            } else {
-                labelUTMX.Text = "";
-                labelUTMY.Text = "";
-            }
+            labelUTMX.Text = utm_x.ToString();
+            labelUTMY.Text = utm_y.ToString();
         }
 
         private void mapPanel_MouseDown(object sender, MouseEventArgs e) {
             if(_mapImage == null) { return;  }
 
             if(e.Button == MouseButtons.Left) {
-                // Select a unit
+                // See if the mouse clicked a unit's selection rect
                 Object obj = null;
                 Point imagePt = PanelToImage(e.Location);
                 foreach(Rectangle key in _selectionRects.Keys) {
@@ -472,12 +539,34 @@ namespace SBCM {
                         obj = _selectionRects[key];
                     }
                 }
-                SelectUnit(obj, false);
-            } else if (e.Button == MouseButtons.Middle) {
+                if ((obj == null && _selectedUnit == null) || (obj == _selectedUnit)) {
+                    // If nothing selected/deselected, start measuring
+                    _mouseMeasuring = true;
+
+                    MapImage map = _campaign.MapImage;
+
+                    map.ImageToUTM(
+                        PanelToImage(e.Location),
+                        out int utm_x, out int utm_y
+                    );
+
+                    _measureUTM_0.X = utm_x;
+                    _measureUTM_0.Y = utm_y;
+                    _measureUTM_1.X = utm_x;
+                    _measureUTM_1.Y = utm_y;
+                } else {
+                    // Otherwise select/deselect the unit
+                    SelectUnit(obj, false);
+                }
+            }
+            
+            if (e.Button == MouseButtons.Middle) {
                 // Start map pan
                 _startPoint = e.Location;
-                _mouseDown = true;
-            } else if(e.Button == MouseButtons.Right) {
+                _mousePanning = true;
+            }
+            
+            if(e.Button == MouseButtons.Right) {
                 // Select a UTM coordinate for moving a unit
                 MapImage map = _campaign.MapImage;
 
@@ -486,14 +575,23 @@ namespace SBCM {
                     out int utm_x, out int utm_y
                 );
 
-                _selectedUTMCoord = new Point(utm_x, utm_y);
+                _selectedUTMCoord.X = utm_x;
+                _selectedUTMCoord.Y = utm_y;
             }
         }
 
         private void mapPanel_MouseUp(object sender, MouseEventArgs e) {
+            if (e.Button == MouseButtons.Left) {
+                if(_mouseMeasuring) {
+                    // Stop measurement
+                    _mouseMeasuring = false;
+                    mapPanel.Invalidate();
+                }
+            }
+            
             if (e.Button == MouseButtons.Middle) {
                 // Stop map pan
-                _mouseDown = false;
+                _mousePanning = false;
             }
         }
 
@@ -600,7 +698,8 @@ namespace SBCM {
             _campaign = campaign;
             campaignName.Text = _campaign.Name;
             _mapImage = _campaign.MapImage.GetBitmap();
-            _mapAnchor = new Point(-_mapImage.Width / 2, -_mapImage.Height / 2);
+            _mapAnchor.X = -_mapImage.Width / 2;
+            _mapAnchor.Y = -_mapImage.Height / 2;
 
             editCallsignTemplateToolStripMenuItem.Enabled = true;
             recalibrateMapImageToolStripMenuItem.Enabled = true;
@@ -1051,10 +1150,8 @@ namespace SBCM {
 
         private void MainWindow_SizeChanged(object sender, EventArgs e) {
             Rectangle rect = mapPanel.ClientRectangle;
-            _mapCenter = new Point(
-                rect.Left + (int)((rect.Right - rect.Left) * 0.5),
-                rect.Top + (int)((rect.Bottom - rect.Top) * 0.5)
-            );
+            _mapCenter.X = rect.Left + (int)((rect.Right - rect.Left) * 0.5);
+            _mapCenter.Y = rect.Top + (int)((rect.Bottom - rect.Top) * 0.5);
             mapPanel.Invalidate();
         }
 
@@ -1079,6 +1176,7 @@ namespace SBCM {
 
             _campaign?.Dispose();
             _mapTransform?.Dispose();
+            DisposeOfBrushes();
         }
 
         private void utmXBox_Leave(object sender, EventArgs e) {
