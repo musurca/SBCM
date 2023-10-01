@@ -179,12 +179,13 @@ namespace SBCM {
 
             Force currentForce = _forces[(string)forceSelector.SelectedItem];
 
+            Font font = new Font(SystemFonts.DefaultFont.FontFamily, 12.0f / _scale);
             // Determine counter size from longest possible callsign
             string longestPossibleCallsign = _campaign.CallsignTemplates[currentForce.Name]
                 .LongestPossibleCallsign;
             SizeF csSize;
             using (Graphics g = Graphics.FromImage(new Bitmap(1, 1))) {
-                csSize = g.MeasureString(longestPossibleCallsign, SystemFonts.DefaultFont);
+                csSize = g.MeasureString(longestPossibleCallsign, font);
             }
             // Counters are 16:9
             float counterWidth = csSize.Width + 2.0f;
@@ -243,6 +244,8 @@ namespace SBCM {
                     }
                 }
             }
+
+            font.Dispose();
         }
 
         private void DrawMapToGraphics(MapImage map, Graphics g) {
@@ -253,17 +256,23 @@ namespace SBCM {
             if (map.UTM_X_Step != 0.0f && map.UTM_Y_Step != 0.0f && mapViewSelect != "Nothing") {
                 Force currentForce = _forces[(string)forceSelector.SelectedItem];
 
+                Font font = new Font(SystemFonts.DefaultFont.FontFamily, 12.0f / _scale);
                 // Determine counter size from longest possible callsign
                 string longestPossibleCallsign = _campaign.CallsignTemplates[currentForce.Name]
                     .LongestPossibleCallsign;
-                SizeF csSize = g.MeasureString(longestPossibleCallsign, SystemFonts.DefaultFont);
+                SizeF csSize = g.MeasureString(longestPossibleCallsign, font);
                 // Counters are 16:9
-                float counterWidth = csSize.Width + 2.0f;
+                float counterWidth = csSize.Width + (2.0f*_scale);
                 float counterHeight = (float)Math.Max(
                     csSize.Height, csSize.Width * 0.5625
                 );
                 float halfCounterWidth = counterWidth / 2.0f;
                 float halfCounterHeight = counterHeight / 2.0f;
+                float oneOverScale = 1.0f / _scale;
+                float twoOverScale = 2.0f * oneOverScale;
+                float fiveOverScale = 5.0f * oneOverScale;
+
+                Pen outlinePen = new Pen(Color.White, oneOverScale);
 
                 if (mapViewSelect == "Platoons") {
                     foreach (Company c in currentForce.Hierarchy.Companies.Values) {
@@ -283,10 +292,10 @@ namespace SBCM {
                                 );
 
                                 g.DrawRectangle(
-                                    _whitePen,
-                                    x_pos - halfCounterWidth - 1.0f,
-                                    y_pos - halfCounterHeight - 1.0f,
-                                    counterWidth + 2.0f, counterHeight + 2.0f
+                                    outlinePen,
+                                    x_pos - halfCounterWidth - oneOverScale,
+                                    y_pos - halfCounterHeight - oneOverScale,
+                                    counterWidth + twoOverScale, counterHeight + twoOverScale
                                 ); ;
 
                                 currentForce.GenerateCallsign(
@@ -296,12 +305,12 @@ namespace SBCM {
 
                                 SizeF callSize = g.MeasureString(
                                     callsign,
-                                    SystemFonts.DefaultFont
+                                    font
                                 );
 
                                 g.DrawString(
                                     callsign,
-                                    SystemFonts.DefaultFont, _fontBrush,
+                                    font, _fontBrush,
                                     x_pos - callSize.Width / 2.0f,
                                     y_pos - callSize.Height / 2.0f
                                 );
@@ -344,20 +353,20 @@ namespace SBCM {
                             );
 
                             g.DrawRectangle(
-                                _whitePen,
-                                x_pos - halfCounterWidth - 1.0f,
-                                y_pos - halfCounterHeight - 1.0f,
-                                counterWidth + 2.0f, counterHeight + 2.0f
+                                outlinePen,
+                                x_pos - halfCounterWidth - oneOverScale,
+                                y_pos - halfCounterHeight - oneOverScale,
+                                counterWidth + twoOverScale, counterHeight + twoOverScale
                             );
 
                             SizeF callSize = g.MeasureString(
                                 u.Callsign,
-                                SystemFonts.DefaultFont
+                                font
                             );
 
                             g.DrawString(
                                 u.Callsign,
-                                SystemFonts.DefaultFont, _fontBrush,
+                                font, _fontBrush,
                                 x_pos - callSize.Width / 2.0f,
                                 y_pos - callSize.Height / 2.0f
                            );
@@ -366,6 +375,8 @@ namespace SBCM {
                 }
 
                 if (_selectedEvent != null) {
+                    Pen explosionPen = new Pen(Color.Red, twoOverScale);
+
                     map.UTMToImage(
                         _selectedEvent.From_UTM_X, _selectedEvent.From_UTM_Y,
                         out float from_x_pos, out float from_y_pos
@@ -376,10 +387,17 @@ namespace SBCM {
                         out float to_x_pos, out float to_y_pos
                     );
 
-                    g.DrawLine(_redPen, from_x_pos, from_y_pos, to_x_pos, to_y_pos);
-                    g.DrawEllipse(_explosionOutline, to_x_pos - 5.0f, to_y_pos - 5.0f, 10.0f, 10.0f);
-                    g.FillEllipse(_explosionBrush, to_x_pos - 5.0f, to_y_pos - 5.0f, 10.0f, 10.0f);
+                    float tenOverScale = 2.0f * fiveOverScale;
+
+                    g.DrawLine(explosionPen, from_x_pos, from_y_pos, to_x_pos, to_y_pos);
+                    g.DrawEllipse(_explosionOutline, to_x_pos - fiveOverScale, to_y_pos - fiveOverScale, tenOverScale, tenOverScale);
+                    g.FillEllipse(_explosionBrush, to_x_pos - fiveOverScale, to_y_pos - fiveOverScale, tenOverScale, tenOverScale);
+
+                    explosionPen.Dispose();
                 }
+
+                font.Dispose();
+                outlinePen.Dispose();
             }
         }
 
@@ -597,7 +615,8 @@ namespace SBCM {
 
         private void mapPanel_Scroll(object sender, MouseEventArgs e) {
             // Map zoom
-            _scale = Math.Min(2.0f, Math.Max(0.5f, _scale + e.Delta / 10000.0f));
+            _scale = Math.Min(5.0f, Math.Max(0.5f, _scale * (1.0f + e.Delta / 5000.0f)));
+            RebuildSelectionRects();
             mapPanel.Invalidate();
         }
 
