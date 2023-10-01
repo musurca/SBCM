@@ -111,6 +111,18 @@ namespace SBCM {
             return true;
         }
 
+        public int UTM_Distance(int utm_x0, int utm_y0, int utm_x1, int utm_y1) {
+            UTMToImage(utm_x0, utm_y0, out float x0, out float y0);
+            UTMToImage(utm_x1, utm_y1, out float x1, out float y1);
+
+            float x_dist = UTM_X_Step * (x1 - x0);
+            float y_dist = UTM_Y_Step * (y1 - y0);
+
+            return (int)Math.Round(
+                10 * Math.Sqrt(x_dist * x_dist + y_dist * y_dist)
+            );
+        }
+
         public void ImageToUTM(Point imagePos, out int x, out int y) {
             x = ((int)(UTM_Anchor_X + UTM_X_Step * imagePos.X)) % 10000;
             y = ((int)(UTM_Anchor_Y - UTM_Y_Step * imagePos.Y)) % 10000;

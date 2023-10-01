@@ -463,28 +463,32 @@ namespace SBCM {
                         out float y1
                     );
 
-                    int dist_x = _measureUTM_1.X - _measureUTM_0.X;
-                    int dist_y = _measureUTM_1.Y - _measureUTM_0.Y;
-
-                    int dist_m = (int)Math.Round(
-                        10*Math.Sqrt(dist_x*dist_x + dist_y*dist_y)
+                    int dist_m = _campaign.MapImage.UTM_Distance(
+                        _measureUTM_0.X, _measureUTM_0.Y, 
+                        _measureUTM_1.X, _measureUTM_1.Y
                     );
 
                     string distStr = $"{dist_m} m";
 
+                    Pen measurePen = new Pen(Color.Gray, 2.0f / _scale);
+                    Font font = new Font(SystemFonts.DefaultFont.FontFamily, 10.0f / _scale);
+
                     SizeF distStrSize = g.MeasureString(
                         distStr,
-                        SystemFonts.DefaultFont
+                        font
                     );
 
-                    g.DrawLine(_measurePen, x0, y0, x1, y1);
+                    g.DrawLine(measurePen, x0, y0, x1, y1);
                     g.DrawString(
-                        distStr, 
-                        SystemFonts.DefaultFont, 
-                        _whiteBrush, 
-                        x1-distStrSize.Width*0.5f, 
-                        y1-distStrSize.Height-2.0f
+                        distStr,
+                        font,
+                        _whiteBrush,
+                        x1 - distStrSize.Width * 0.5f,
+                        y1 - distStrSize.Height - (2.0f / _scale)
                     );
+
+                    font.Dispose();
+                    measurePen.Dispose();
                 }
             }
         }
