@@ -121,14 +121,54 @@ namespace SBCM {
                 // Move on to second point
                 labelInstructions.Text = "Click a second point on the map to specify its UTM coordinates";
             } else {
+
+                int lowPixelX, lowUTMX, highPixelX, highUTMX;
+                if (_panelSamples[1].X < _panelSamples[0].X) {
+                    lowPixelX = _panelSamples[1].X;
+                    lowUTMX = _utmSamples[1].X;
+                    highPixelX = _panelSamples[0].X;
+                    highUTMX = _utmSamples[0].X;
+                } else {
+                    lowPixelX = _panelSamples[0].X;
+                    lowUTMX = _utmSamples[0].X;
+                    highPixelX = _panelSamples[1].X;
+                    highUTMX = _utmSamples[1].X;
+                }
+
+                int lowPixelY, lowUTMY, highPixelY, highUTMY;
+                if (_panelSamples[1].Y < _panelSamples[0].Y) {
+                    lowPixelY = _panelSamples[1].Y;
+                    lowUTMY = _utmSamples[1].Y;
+                    highPixelY = _panelSamples[0].Y;
+                    highUTMY = _utmSamples[0].Y;
+                } else {
+                    lowPixelY = _panelSamples[0].Y;
+                    lowUTMY = _utmSamples[0].Y;
+                    highPixelY = _panelSamples[1].Y;
+                    highUTMY = _utmSamples[1].Y;
+                }
+
+                // UTM X increases as pixel X increases
+                int utm_dist_x;
+                if(highUTMX < lowUTMX) {
+                    utm_dist_x = 10000 - lowUTMX + highUTMX;
+                } else {
+                    utm_dist_x = highUTMX - lowUTMX;
+                }
+
+                // UTM Y increases as pixel Y decreases
+                int utm_dist_y;
+                if (highUTMY > lowUTMY) {
+                    utm_dist_y = 10000 - highUTMY + lowUTMY;
+                } else {
+                    utm_dist_y = lowUTMY - highUTMY;
+                }
+
                 // Calculate UTM anchor and step for image
-                int utm_dist_x = _utmSamples[1].X - _utmSamples[0].X;
-                int utm_dist_y = _utmSamples[1].Y - _utmSamples[0].Y;
+                int pixel_dist_x = highPixelX - lowPixelX;
+                int pixel_dist_y = highPixelY - lowPixelY;
 
-                int pixel_dist_x = _panelSamples[1].X - _panelSamples[0].X;
-                int pixel_dist_y = _panelSamples[1].Y - _panelSamples[0].Y;
-
-                if(pixel_dist_x == 0 || pixel_dist_y == 0) {
+                if (pixel_dist_x == 0 || pixel_dist_y == 0) {
                     _pointIndex--; // do over
                     return;
                 }
@@ -136,11 +176,13 @@ namespace SBCM {
                 float x_step = utm_dist_x / (float)pixel_dist_x;
                 float y_step = utm_dist_y / (float)pixel_dist_y;
 
+                float utm_anchor_x = (lowUTMX - x_step * lowPixelX) % 10000.0f;
+                if (utm_anchor_x < 0.0f) utm_anchor_x += 10000.0f;
+                float utm_anchor_y = (lowUTMY + y_step * lowPixelY) % 10000.0f;
+                if (utm_anchor_y < 0.0f) utm_anchor_y += 10000.0f;
+
                 _image.SetUTMStep(x_step, y_step);
-                _image.SetUTMAnchor(
-                    _utmSamples[0].X - x_step * _panelSamples[0].X,
-                    _utmSamples[0].Y - y_step * _panelSamples[0].Y
-                );
+                _image.SetUTMAnchor(utm_anchor_x, utm_anchor_y);   
 
                 DialogResult = DialogResult.OK;
             }

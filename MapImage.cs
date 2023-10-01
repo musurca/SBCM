@@ -4,6 +4,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -68,29 +69,73 @@ namespace SBCM {
         public bool WithinUTMExtents(int utm_x, int utm_y) {
             int utm_x0 = (int)UTM_Anchor_X;
             int utm_y0 = (int)UTM_Anchor_Y;
-            int utm_x1 = (int)(UTM_Anchor_X + UTM_X_Step * _image.Width);
-            int utm_y1 = (int)(UTM_Anchor_Y + UTM_Y_Step * _image.Height);
+            int utm_x1 = ((int)(UTM_Anchor_X + UTM_X_Step * _image.Width)) % 10000;
+            int utm_y1 = ((int)(UTM_Anchor_Y - UTM_Y_Step * _image.Height)) % 10000;
+            if (utm_x1 < 0) utm_x1 += 10000;
+            if (utm_y1 < 0) utm_y1 += 10000;
 
+            var x_extents = new List<(float, float)>();
             if(utm_x1 < utm_x0) {
-                (utm_x0, utm_x1) = (utm_x1, utm_x0);
-            }
-            if(utm_y1 < utm_y0) {
-                (utm_y0, utm_y1) = (utm_y1, utm_y0);
+                x_extents.Add((utm_x0, 10000));
+                x_extents.Add((0, utm_x1));
+            } else {
+                x_extents.Add((utm_x0, utm_x1));
             }
 
-            return utm_x >= utm_x0 && utm_y >= utm_y0
-                && utm_x <= utm_x1 && utm_y <= utm_y1;
+            var y_extents = new List<(float, float)>();
+            if (utm_y1 > utm_y0) {
+                x_extents.Add((utm_y1, 10000));
+                x_extents.Add((0, utm_y0));
+            } else {
+                x_extents.Add((utm_y1, utm_y0));
+            }
+
+            bool in_range = false;
+            foreach (var range in x_extents) {
+                if (utm_x >= range.Item1 && utm_x <= range.Item2) {
+                    in_range = true;
+                    break;
+                }
+            }
+            if (!in_range) return false;
+
+            in_range = false;
+            foreach (var range in y_extents) {
+                if (utm_x >= range.Item1 && utm_x <= range.Item2) {
+                    in_range = true;
+                    break;
+                }
+            }
+            if (!in_range) return false;
+
+            return true;
         }
 
         public void ImageToUTM(Point imagePos, out int x, out int y) {
-            x = (int)(UTM_Anchor_X + UTM_X_Step * imagePos.X);
-            y = (int)(UTM_Anchor_Y + UTM_Y_Step * imagePos.Y);
+            x = ((int)(UTM_Anchor_X + UTM_X_Step * imagePos.X)) % 10000;
+            y = ((int)(UTM_Anchor_Y - UTM_Y_Step * imagePos.Y)) % 10000;
+            if (x < 0) x += 10000;
+            if (y < 0) y += 10000;
         }
 
         public void UTMToImage(int utm_x, int utm_y, out float x, out float y) {
             if (UTM_X_Step != 0.0f && UTM_Y_Step != 0.0f) {
-                x = ((utm_x - UTM_Anchor_X) / UTM_X_Step);
-                y = ((utm_y - UTM_Anchor_Y) / UTM_Y_Step);
+                float x_dist;
+                if(utm_x < UTM_Anchor_X) {
+                    x_dist = 10000 - UTM_Anchor_X + utm_x;
+                } else {
+                    x_dist = utm_x - UTM_Anchor_X;
+                }
+
+                float y_dist;
+                if (utm_y > UTM_Anchor_Y) {
+                    y_dist = 10000 - utm_y + UTM_Anchor_Y;
+                } else {
+                    y_dist = UTM_Anchor_Y - utm_y;
+                }
+
+                x = x_dist / UTM_X_Step;
+                y = y_dist / UTM_Y_Step;
             } else {
                 x = y = 0.0f;
             }

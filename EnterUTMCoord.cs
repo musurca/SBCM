@@ -23,10 +23,7 @@ namespace SBCM {
         }
 
         private void utmXBox_KeyPress(object sender, KeyPressEventArgs e) {
-            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar) && e.KeyChar != '-') {
-                e.Handled = true;
-            }
-            if(e.KeyChar == '-' && ((TextBox)(sender)).Text.IndexOf('-') != -1) {
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar)) {
                 e.Handled = true;
             }
 
