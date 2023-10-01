@@ -67,6 +67,7 @@
             this.mapPanelContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.moveUnitMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.turnCounter = new System.Windows.Forms.ComboBox();
             this.campaignName = new System.Windows.Forms.Label();
             this.campaignDate = new System.Windows.Forms.Label();
             this.mapShowSelector = new System.Windows.Forms.ComboBox();
@@ -127,7 +128,7 @@
             this.labelUTMY = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.btnMapExport = new System.Windows.Forms.Button();
-            this.turnCounter = new System.Windows.Forms.ComboBox();
+            this.ScrollTimer = new System.Windows.Forms.Timer(this.components);
             this.mainMenu.SuspendLayout();
             this.mapPanelContextMenu.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -314,7 +315,7 @@
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(116, 22);
             this.aboutToolStripMenuItem.Text = "&About...";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
@@ -383,6 +384,16 @@
             this.groupBox2.Size = new System.Drawing.Size(765, 35);
             this.groupBox2.TabIndex = 5;
             this.groupBox2.TabStop = false;
+            // 
+            // turnCounter
+            // 
+            this.turnCounter.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.turnCounter.FormattingEnabled = true;
+            this.turnCounter.Location = new System.Drawing.Point(654, 9);
+            this.turnCounter.Name = "turnCounter";
+            this.turnCounter.Size = new System.Drawing.Size(107, 21);
+            this.turnCounter.TabIndex = 1;
+            this.turnCounter.SelectedIndexChanged += new System.EventHandler(this.turnCounter_SelectedIndexChanged);
             // 
             // campaignName
             // 
@@ -1095,15 +1106,10 @@
             this.btnMapExport.UseVisualStyleBackColor = true;
             this.btnMapExport.Click += new System.EventHandler(this.btnMapExport_Click);
             // 
-            // turnCounter
+            // ScrollTimer
             // 
-            this.turnCounter.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.turnCounter.FormattingEnabled = true;
-            this.turnCounter.Location = new System.Drawing.Point(654, 9);
-            this.turnCounter.Name = "turnCounter";
-            this.turnCounter.Size = new System.Drawing.Size(107, 21);
-            this.turnCounter.TabIndex = 1;
-            this.turnCounter.SelectedIndexChanged += new System.EventHandler(this.turnCounter_SelectedIndexChanged);
+            this.ScrollTimer.Interval = 20;
+            this.ScrollTimer.Tick += new System.EventHandler(this.ScrollTimer_Tick);
             // 
             // MainWindow
             // 
@@ -1131,6 +1137,8 @@
             this.Text = "Steel Beasts Campaign Manager";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainWindow_FormClosing);
             this.SizeChanged += new System.EventHandler(this.MainWindow_SizeChanged);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MainWindow_KeyDown);
+            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.MainWindow_KeyUp);
             this.mainMenu.ResumeLayout(false);
             this.mainMenu.PerformLayout();
             this.mapPanelContextMenu.ResumeLayout(false);
@@ -1243,6 +1251,7 @@
         private System.Windows.Forms.ToolStripMenuItem imageFromMapToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ComboBox turnCounter;
+        private System.Windows.Forms.Timer ScrollTimer;
     }
 }
 

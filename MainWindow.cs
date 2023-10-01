@@ -17,6 +17,7 @@ namespace SBCM {
         Point _mapCenter;
         bool _mousePanning;
         bool _mouseMeasuring;
+        float _xScroll, _yScroll;
 
         Point _measureUTM_0;
         Point _measureUTM_1;
@@ -58,6 +59,7 @@ namespace SBCM {
 
         public MainWindow() {
             InitializeComponent();
+            KeyPreview = true;
 
             mapPanel.MouseWheel += mapPanel_Scroll;
 
@@ -73,6 +75,7 @@ namespace SBCM {
             _scale = 1.0f;
             _mousePanning = false;
             _mouseMeasuring = false;
+            _xScroll = _yScroll = 0.0f;
 
             _mapAnchor = new Point();
             _mapCenter = new Point();
@@ -1428,6 +1431,48 @@ namespace SBCM {
         private void turnCounter_SelectedIndexChanged(object sender, EventArgs e) {
             int index = turnCounter.Items.IndexOf(turnCounter.SelectedItem);
             LoadTurn(_campaign.GetTurn(index));
+        }
+
+        private void MainWindow_KeyDown(object sender, KeyEventArgs e) {
+            if (e.KeyCode == Keys.Left) _xScroll -= 1.0f;
+            if (e.KeyCode == Keys.Right) _xScroll += 1.0f;
+            if (e.KeyCode == Keys.Up) _yScroll -= 1.0f;
+            if (e.KeyCode == Keys.Down) _yScroll += 1.0f;
+
+            _xScroll = Math.Max(-1.0f, Math.Min(1.0f, _xScroll));
+            _yScroll = Math.Max(-1.0f, Math.Min(1.0f, _yScroll));
+
+            if (((int)_xScroll) == 0 && ((int)_yScroll) == 0) {
+                ScrollTimer.Enabled = false;
+            } else {
+                ScrollTimer.Enabled = true;
+            }
+        }
+
+        private void MainWindow_KeyUp(object sender, KeyEventArgs e) {
+            if (e.KeyCode == Keys.Left) _xScroll += 1.0f;
+            if (e.KeyCode == Keys.Right) _xScroll -= 1.0f;
+            if (e.KeyCode == Keys.Up) _yScroll += 1.0f;
+            if (e.KeyCode == Keys.Down) _yScroll -= 1.0f;
+
+            _xScroll = Math.Max(-1.0f, Math.Min(1.0f, _xScroll));
+            _yScroll = Math.Max(-1.0f, Math.Min(1.0f, _yScroll));
+
+            if (((int)_xScroll) == 0 && ((int)_yScroll) == 0) {
+                ScrollTimer.Enabled = false;
+            } else {
+                ScrollTimer.Enabled = true;
+            }
+        }
+
+        private void ScrollTimer_Tick(object sender, EventArgs e) {
+            if (_mapImage != null) {
+                _mapAnchor.X -= (int)(15.0f * _xScroll / _scale);
+                _mapAnchor.Y -= (int)(15.0f * _yScroll / _scale);
+                _mapAnchor.X = Math.Max(-_mapImage.Width, Math.Min(0, _mapAnchor.X));
+                _mapAnchor.Y = Math.Max(-_mapImage.Height, Math.Min(0, _mapAnchor.Y));
+                mapPanel.Invalidate();
+            }
         }
     }
 }
