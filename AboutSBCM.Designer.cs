@@ -25,10 +25,10 @@
         private void InitializeComponent() {
             this.label1 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.label2 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
-            this.authorEmail = new System.Windows.Forms.LinkLabel();
             this.authorGithub = new System.Windows.Forms.LinkLabel();
+            this.authorEmail = new System.Windows.Forms.LinkLabel();
+            this.label3 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
             this.btnOK = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
@@ -56,25 +56,15 @@
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             // 
-            // label2
+            // authorGithub
             // 
-            this.label2.Location = new System.Drawing.Point(6, 39);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(188, 23);
-            this.label2.TabIndex = 1;
-            this.label2.Text = "v0.1.0";
-            this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.label2.UseMnemonic = false;
-            // 
-            // label3
-            // 
-            this.label3.Location = new System.Drawing.Point(6, 96);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(188, 23);
-            this.label3.TabIndex = 2;
-            this.label3.Text = "Mezentius @ www.steelbeasts.com";
-            this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.label3.UseMnemonic = false;
+            this.authorGithub.Location = new System.Drawing.Point(3, 132);
+            this.authorGithub.Name = "authorGithub";
+            this.authorGithub.Size = new System.Drawing.Size(191, 23);
+            this.authorGithub.TabIndex = 4;
+            this.authorGithub.TabStop = true;
+            this.authorGithub.Text = "github.com/musurca/SBCM";
+            this.authorGithub.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // authorEmail
             // 
@@ -86,15 +76,25 @@
             this.authorEmail.Text = "nick.musurca@gmail.com";
             this.authorEmail.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // authorGithub
+            // label3
             // 
-            this.authorGithub.Location = new System.Drawing.Point(3, 132);
-            this.authorGithub.Name = "authorGithub";
-            this.authorGithub.Size = new System.Drawing.Size(191, 23);
-            this.authorGithub.TabIndex = 4;
-            this.authorGithub.TabStop = true;
-            this.authorGithub.Text = "github.com/musurca/SBCM";
-            this.authorGithub.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.label3.Location = new System.Drawing.Point(6, 96);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(188, 23);
+            this.label3.TabIndex = 2;
+            this.label3.Text = "Mezentius @ www.steelbeasts.com";
+            this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.label3.UseMnemonic = false;
+            // 
+            // label2
+            // 
+            this.label2.Location = new System.Drawing.Point(6, 39);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(188, 23);
+            this.label2.TabIndex = 1;
+            this.label2.Text = "v0.2.0";
+            this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.label2.UseMnemonic = false;
             // 
             // btnOK
             // 
