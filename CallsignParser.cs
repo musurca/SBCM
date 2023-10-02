@@ -153,7 +153,7 @@ namespace SBCM {
                 && sectionValid && teamValid;
         }
 
-        private void ExtractCompanyPlatoon(
+        private bool ExtractCompanyPlatoon(
             string callsign,
             Regex regex,
             List<string> symbol_order,
@@ -187,6 +187,8 @@ namespace SBCM {
                     }
                 }
             }
+
+            return match.Success;
         }
 
         public void GetBattalionPosition(
@@ -205,55 +207,80 @@ namespace SBCM {
             company = "";
 
             // Is it a team?
-            ExtractCompanyPlatoon(
-                callsign,
-                RegexTeam,
-                RegexTeamSymbolOrder,
-                ref company, ref platoon,
-                ref section, ref team
-            );
-            if(team != "") {
-                return;
+            if (
+                ExtractCompanyPlatoon(
+                    callsign,
+                    RegexTeam,
+                    RegexTeamSymbolOrder,
+                    ref company, ref platoon,
+                    ref section, ref team
+                )
+            ) {
+                if (team != "") {
+                    return;
+                }
             }
+
+            team = "";
+            section = "";
+            platoon = "";
+            company = "";
 
             // Is it a section or platoon CO/XO?
-            ExtractCompanyPlatoon(
-                callsign,
-                RegexSection,
-                RegexSectionSymbolOrder,
-                ref company, ref platoon,
-                ref section, ref team
-            );
-            if(section != "") { 
-                if (section == SymbolPlatoonCO) {
-                    command = CommandState.CO;
-                    section = "";
-                } else if (section == SymbolPlatoonXO) {
-                    command = CommandState.XO;
-                    section = "";
+            bool sectionPassed = false;
+            if (
+                ExtractCompanyPlatoon(
+                    callsign,
+                    RegexSection,
+                    RegexSectionSymbolOrder,
+                    ref company, ref platoon,
+                    ref section, ref team
+                )
+            ) {
+                sectionPassed = true;
+                if (section != "") {
+                    if (section == SymbolPlatoonCO) {
+                        command = CommandState.CO;
+                        section = "";
+                        return;
+                    } else if (section == SymbolPlatoonXO) {
+                        command = CommandState.XO;
+                        section = "";
+                        return;
+                    }
                 }
-
-                return;
             }
 
+            string checkCompany = "";
+            string checkPlatoon = "";
+            string checkSection = "";
+            string checkTeam = "";
             // Is it a platoon or company CO/XO?
-            ExtractCompanyPlatoon(
-                callsign,
-                RegexPlatoon,
-                RegexPlatoonSymbolOrder,
-                ref company, ref platoon,
-                ref section, ref team
-            );
-            if(platoon != "") { 
-                if (platoon == SymbolCompanyCO) {
-                    command = CommandState.CO;
+            if (
+                ExtractCompanyPlatoon(
+                    callsign,
+                    RegexPlatoon,
+                    RegexPlatoonSymbolOrder,
+                    ref checkCompany, ref checkPlatoon,
+                    ref checkSection, ref checkTeam
+               )
+            ) {
+                if (checkPlatoon == SymbolCompanyCO || checkPlatoon == SymbolCompanyXO) {
+                    company = checkCompany;
+                    section = "";
+                    team = "";
                     platoon = "";
-                } else if (platoon == SymbolCompanyXO) {
-                    command = CommandState.XO;
-                    platoon = "";
+                    if (checkPlatoon == SymbolCompanyCO) {
+                        command = CommandState.CO;
+                    } else if (checkPlatoon == SymbolCompanyXO) {
+                        command = CommandState.XO;
+                    }
+                } else if (!sectionPassed) {
+                    company = checkCompany;
+                    platoon = checkPlatoon;
+                    section = "";
+                    team = "";
                 }
-
-                return;
             }
         }
 
@@ -268,9 +295,9 @@ namespace SBCM {
                 }
             }
             if (addl_symbol_co != "") {
-                regex += "|" + addl_symbol_co + "|" + addl_symbol_xo;
+                regex = $"[ ]?{addl_symbol_co}[ ]?|[ ]?{addl_symbol_xo}[ ]?|{regex}";
             }
-            return "(" + regex + ")";
+            return $"({regex})";
         }
 
         public string SwapSymbols(string input, out List<string> order) {
@@ -313,12 +340,15 @@ namespace SBCM {
             order = symbolOrder.Values.ToList();
 
             // Build the final regex
-            return output
+            string regex_str = output
                 .Replace(MARKER_COMPANY, CompanyRegexStr)
                 .Replace(MARKER_PLATOON, PlatoonRegexStr)
                 .Replace(MARKER_SECTION, SectionRegexStr)
                 .Replace(MARKER_TEAM, TeamRegexStr)
             ;
+
+            // Exact matches only
+            return $"^{regex_str}$";
         }
     }
 }
