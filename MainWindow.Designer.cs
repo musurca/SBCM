@@ -24,22 +24,23 @@
         /// </summary>
         private void InitializeComponent() {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle17 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle18 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle19 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle20 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle21 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle22 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle23 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle24 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle25 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle26 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle27 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle28 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle29 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle30 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle31 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle32 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle33 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle34 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle35 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle36 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle37 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle38 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle39 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle40 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle41 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle42 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle43 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle44 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle45 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle46 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle47 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle48 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.TabPage tabPage03;
             this.mainMenu = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.newToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -72,11 +73,9 @@
             this.campaignDate = new System.Windows.Forms.Label();
             this.mapShowSelector = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.eventGrid = new System.Windows.Forms.DataGridView();
             this.TimeColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.EventColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.playerGrid = new System.Windows.Forms.DataGridView();
             this.NameColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.HitPctColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -109,9 +108,6 @@
             this.statusFCS = new System.Windows.Forms.Label();
             this.statusLoader = new System.Windows.Forms.Label();
             this.ammoGrid = new System.Windows.Forms.DataGridView();
-            this.AmmoColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.AmountColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.CapacityColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
             this.typeLabel = new System.Windows.Forms.Label();
             this.callsignLabel = new System.Windows.Forms.Label();
@@ -129,12 +125,17 @@
             this.label3 = new System.Windows.Forms.Label();
             this.btnMapExport = new System.Windows.Forms.Button();
             this.ScrollTimer = new System.Windows.Forms.Timer(this.components);
+            this.AmmoColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.AmountColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.CapacityColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.mainTabControl = new System.Windows.Forms.TabControl();
+            this.tabPage01 = new System.Windows.Forms.TabPage();
+            this.tabPage02 = new System.Windows.Forms.TabPage();
+            tabPage03 = new System.Windows.Forms.TabPage();
             this.mainMenu.SuspendLayout();
             this.mapPanelContextMenu.SuspendLayout();
             this.groupBox2.SuspendLayout();
-            this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.eventGrid)).BeginInit();
-            this.groupBox3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.playerGrid)).BeginInit();
             this.selectedUnitGroupBox.SuspendLayout();
             this.damagePanel.SuspendLayout();
@@ -142,6 +143,10 @@
             ((System.ComponentModel.ISupportInitialize)(this.ammoGrid)).BeginInit();
             this.groupBox5.SuspendLayout();
             this.groupBox4.SuspendLayout();
+            this.mainTabControl.SuspendLayout();
+            this.tabPage01.SuspendLayout();
+            tabPage03.SuspendLayout();
+            this.tabPage02.SuspendLayout();
             this.SuspendLayout();
             // 
             // mainMenu
@@ -154,7 +159,7 @@
             this.helpToolStripMenuItem});
             this.mainMenu.Location = new System.Drawing.Point(0, 0);
             this.mainMenu.Name = "mainMenu";
-            this.mainMenu.Size = new System.Drawing.Size(1031, 24);
+            this.mainMenu.Size = new System.Drawing.Size(884, 24);
             this.mainMenu.TabIndex = 0;
             this.mainMenu.Text = "menuStrip1";
             // 
@@ -323,18 +328,18 @@
             // 
             this.oobTree.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.oobTree.Location = new System.Drawing.Point(783, 368);
+            this.oobTree.Location = new System.Drawing.Point(616, 338);
             this.oobTree.Name = "oobTree";
-            this.oobTree.Size = new System.Drawing.Size(236, 185);
+            this.oobTree.Size = new System.Drawing.Size(236, 215);
             this.oobTree.TabIndex = 5;
             this.oobTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.oobTree_AfterSelect);
             // 
             // forceSelector
             // 
-            this.forceSelector.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.forceSelector.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.forceSelector.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.forceSelector.FormattingEnabled = true;
-            this.forceSelector.Location = new System.Drawing.Point(783, 559);
+            this.forceSelector.Location = new System.Drawing.Point(620, 9);
             this.forceSelector.Name = "forceSelector";
             this.forceSelector.Size = new System.Drawing.Size(236, 21);
             this.forceSelector.TabIndex = 6;
@@ -348,9 +353,9 @@
             this.mapPanel.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.mapPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.mapPanel.ContextMenuStrip = this.mapPanelContextMenu;
-            this.mapPanel.Location = new System.Drawing.Point(12, 61);
+            this.mapPanel.Location = new System.Drawing.Point(1, 0);
             this.mapPanel.Name = "mapPanel";
-            this.mapPanel.Size = new System.Drawing.Size(765, 492);
+            this.mapPanel.Size = new System.Drawing.Size(609, 521);
             this.mapPanel.TabIndex = 3;
             this.mapPanel.Paint += new System.Windows.Forms.PaintEventHandler(this.panel1_Paint);
             this.mapPanel.MouseDown += new System.Windows.Forms.MouseEventHandler(this.mapPanel_MouseDown);
@@ -377,19 +382,21 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox2.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.groupBox2.Controls.Add(this.turnCounter);
+            this.groupBox2.Controls.Add(this.forceSelector);
             this.groupBox2.Controls.Add(this.campaignName);
             this.groupBox2.Controls.Add(this.campaignDate);
             this.groupBox2.Location = new System.Drawing.Point(12, 25);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(765, 35);
+            this.groupBox2.Size = new System.Drawing.Size(860, 35);
             this.groupBox2.TabIndex = 5;
             this.groupBox2.TabStop = false;
             // 
             // turnCounter
             // 
+            this.turnCounter.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.turnCounter.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.turnCounter.FormattingEnabled = true;
-            this.turnCounter.Location = new System.Drawing.Point(654, 9);
+            this.turnCounter.Location = new System.Drawing.Point(507, 9);
             this.turnCounter.Name = "turnCounter";
             this.turnCounter.Size = new System.Drawing.Size(107, 21);
             this.turnCounter.TabIndex = 1;
@@ -410,9 +417,9 @@
             // 
             this.campaignDate.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.campaignDate.Location = new System.Drawing.Point(6, 14);
+            this.campaignDate.Location = new System.Drawing.Point(2, 14);
             this.campaignDate.Name = "campaignDate";
-            this.campaignDate.Size = new System.Drawing.Size(753, 15);
+            this.campaignDate.Size = new System.Drawing.Size(612, 15);
             this.campaignDate.TabIndex = 2;
             this.campaignDate.Text = "September 7, 2023";
             this.campaignDate.TextAlign = System.Drawing.ContentAlignment.TopCenter;
@@ -427,7 +434,7 @@
             "Platoons",
             "All Units",
             "Nothing"});
-            this.mapShowSelector.Location = new System.Drawing.Point(51, 559);
+            this.mapShowSelector.Location = new System.Drawing.Point(48, 528);
             this.mapShowSelector.Name = "mapShowSelector";
             this.mapShowSelector.Size = new System.Drawing.Size(76, 21);
             this.mapShowSelector.TabIndex = 7;
@@ -437,43 +444,34 @@
             // 
             this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(11, 562);
+            this.label1.Location = new System.Drawing.Point(8, 531);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(34, 13);
             this.label1.TabIndex = 7;
             this.label1.Text = "Show";
-            // 
-            // groupBox1
-            // 
-            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupBox1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.groupBox1.Controls.Add(this.eventGrid);
-            this.groupBox1.Location = new System.Drawing.Point(643, 586);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(376, 135);
-            this.groupBox1.TabIndex = 4;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Events";
             // 
             // eventGrid
             // 
             this.eventGrid.AllowUserToAddRows = false;
             this.eventGrid.AllowUserToDeleteRows = false;
             this.eventGrid.AllowUserToResizeRows = false;
-            dataGridViewCellStyle17.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle17.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle17.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle17.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle17.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle17.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle17.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.eventGrid.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle17;
+            this.eventGrid.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            dataGridViewCellStyle33.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle33.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle33.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle33.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle33.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle33.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle33.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.eventGrid.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle33;
             this.eventGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.eventGrid.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.TimeColumn,
             this.EventColumn});
             this.eventGrid.EnableHeadersVisualStyles = false;
-            this.eventGrid.Location = new System.Drawing.Point(7, 19);
+            this.eventGrid.Location = new System.Drawing.Point(0, 0);
             this.eventGrid.MultiSelect = false;
             this.eventGrid.Name = "eventGrid";
             this.eventGrid.ReadOnly = true;
@@ -483,7 +481,7 @@
             this.eventGrid.ShowCellErrors = false;
             this.eventGrid.ShowEditingIcon = false;
             this.eventGrid.ShowRowErrors = false;
-            this.eventGrid.Size = new System.Drawing.Size(362, 110);
+            this.eventGrid.Size = new System.Drawing.Size(851, 553);
             this.eventGrid.TabIndex = 10;
             this.eventGrid.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.eventGrid_CellClick);
             this.eventGrid.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.eventGrid_CellContentClick);
@@ -503,19 +501,6 @@
             this.EventColumn.ReadOnly = true;
             this.EventColumn.Width = 300;
             // 
-            // groupBox3
-            // 
-            this.groupBox3.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupBox3.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.groupBox3.Controls.Add(this.playerGrid);
-            this.groupBox3.Location = new System.Drawing.Point(12, 586);
-            this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(625, 135);
-            this.groupBox3.TabIndex = 8;
-            this.groupBox3.TabStop = false;
-            this.groupBox3.Text = "Players";
-            // 
             // playerGrid
             // 
             this.playerGrid.AllowUserToAddRows = false;
@@ -525,14 +510,14 @@
             this.playerGrid.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            dataGridViewCellStyle18.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle18.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle18.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle18.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle18.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle18.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle18.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.playerGrid.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle18;
+            dataGridViewCellStyle34.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle34.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle34.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle34.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle34.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle34.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle34.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.playerGrid.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle34;
             this.playerGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.playerGrid.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.NameColumn,
@@ -546,7 +531,7 @@
             this.LossesVehicleUnitColumn,
             this.LossesPersonnelUnitColumn});
             this.playerGrid.EnableHeadersVisualStyles = false;
-            this.playerGrid.Location = new System.Drawing.Point(6, 19);
+            this.playerGrid.Location = new System.Drawing.Point(0, 0);
             this.playerGrid.MultiSelect = false;
             this.playerGrid.Name = "playerGrid";
             this.playerGrid.ReadOnly = true;
@@ -556,13 +541,13 @@
             this.playerGrid.ShowCellErrors = false;
             this.playerGrid.ShowEditingIcon = false;
             this.playerGrid.ShowRowErrors = false;
-            this.playerGrid.Size = new System.Drawing.Size(613, 110);
+            this.playerGrid.Size = new System.Drawing.Size(851, 553);
             this.playerGrid.TabIndex = 9;
             // 
             // NameColumn
             // 
-            dataGridViewCellStyle19.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            this.NameColumn.DefaultCellStyle = dataGridViewCellStyle19;
+            dataGridViewCellStyle35.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            this.NameColumn.DefaultCellStyle = dataGridViewCellStyle35;
             this.NameColumn.HeaderText = "Name";
             this.NameColumn.Name = "NameColumn";
             this.NameColumn.ReadOnly = true;
@@ -570,8 +555,8 @@
             // 
             // HitPctColumn
             // 
-            dataGridViewCellStyle20.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            this.HitPctColumn.DefaultCellStyle = dataGridViewCellStyle20;
+            dataGridViewCellStyle36.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            this.HitPctColumn.DefaultCellStyle = dataGridViewCellStyle36;
             this.HitPctColumn.HeaderText = "Hit %";
             this.HitPctColumn.Name = "HitPctColumn";
             this.HitPctColumn.ReadOnly = true;
@@ -579,8 +564,8 @@
             // 
             // UserKDColumn
             // 
-            dataGridViewCellStyle21.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            this.UserKDColumn.DefaultCellStyle = dataGridViewCellStyle21;
+            dataGridViewCellStyle37.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            this.UserKDColumn.DefaultCellStyle = dataGridViewCellStyle37;
             this.UserKDColumn.HeaderText = "Personal K/D";
             this.UserKDColumn.Name = "UserKDColumn";
             this.UserKDColumn.ReadOnly = true;
@@ -588,8 +573,8 @@
             // 
             // UnitKDColumn
             // 
-            dataGridViewCellStyle22.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            this.UnitKDColumn.DefaultCellStyle = dataGridViewCellStyle22;
+            dataGridViewCellStyle38.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            this.UnitKDColumn.DefaultCellStyle = dataGridViewCellStyle38;
             this.UnitKDColumn.HeaderText = "Unit K/D";
             this.UnitKDColumn.Name = "UnitKDColumn";
             this.UnitKDColumn.ReadOnly = true;
@@ -597,8 +582,8 @@
             // 
             // KillsVehicleUserColumn
             // 
-            dataGridViewCellStyle23.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            this.KillsVehicleUserColumn.DefaultCellStyle = dataGridViewCellStyle23;
+            dataGridViewCellStyle39.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            this.KillsVehicleUserColumn.DefaultCellStyle = dataGridViewCellStyle39;
             this.KillsVehicleUserColumn.HeaderText = "Personal Kills";
             this.KillsVehicleUserColumn.Name = "KillsVehicleUserColumn";
             this.KillsVehicleUserColumn.ReadOnly = true;
@@ -606,8 +591,8 @@
             // 
             // KillsPersonnelColumn
             // 
-            dataGridViewCellStyle24.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            this.KillsPersonnelColumn.DefaultCellStyle = dataGridViewCellStyle24;
+            dataGridViewCellStyle40.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            this.KillsPersonnelColumn.DefaultCellStyle = dataGridViewCellStyle40;
             this.KillsPersonnelColumn.HeaderText = "Personal Losses";
             this.KillsPersonnelColumn.Name = "KillsPersonnelColumn";
             this.KillsPersonnelColumn.ReadOnly = true;
@@ -615,32 +600,32 @@
             // 
             // KillsFratricideColumn
             // 
-            dataGridViewCellStyle25.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            this.KillsFratricideColumn.DefaultCellStyle = dataGridViewCellStyle25;
+            dataGridViewCellStyle41.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            this.KillsFratricideColumn.DefaultCellStyle = dataGridViewCellStyle41;
             this.KillsFratricideColumn.HeaderText = "Personal Fratricides";
             this.KillsFratricideColumn.Name = "KillsFratricideColumn";
             this.KillsFratricideColumn.ReadOnly = true;
             // 
             // KillsUnitVehicleColumn
             // 
-            dataGridViewCellStyle26.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            this.KillsUnitVehicleColumn.DefaultCellStyle = dataGridViewCellStyle26;
+            dataGridViewCellStyle42.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            this.KillsUnitVehicleColumn.DefaultCellStyle = dataGridViewCellStyle42;
             this.KillsUnitVehicleColumn.HeaderText = "Unit Kills (Vehicle)";
             this.KillsUnitVehicleColumn.Name = "KillsUnitVehicleColumn";
             this.KillsUnitVehicleColumn.ReadOnly = true;
             // 
             // LossesVehicleUnitColumn
             // 
-            dataGridViewCellStyle27.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            this.LossesVehicleUnitColumn.DefaultCellStyle = dataGridViewCellStyle27;
+            dataGridViewCellStyle43.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            this.LossesVehicleUnitColumn.DefaultCellStyle = dataGridViewCellStyle43;
             this.LossesVehicleUnitColumn.HeaderText = "Unit Losses (Vehicle)";
             this.LossesVehicleUnitColumn.Name = "LossesVehicleUnitColumn";
             this.LossesVehicleUnitColumn.ReadOnly = true;
             // 
             // LossesPersonnelUnitColumn
             // 
-            dataGridViewCellStyle28.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            this.LossesPersonnelUnitColumn.DefaultCellStyle = dataGridViewCellStyle28;
+            dataGridViewCellStyle44.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            this.LossesPersonnelUnitColumn.DefaultCellStyle = dataGridViewCellStyle44;
             this.LossesPersonnelUnitColumn.HeaderText = "Unit Losses (Personnel)";
             this.LossesPersonnelUnitColumn.Name = "LossesPersonnelUnitColumn";
             this.LossesPersonnelUnitColumn.ReadOnly = true;
@@ -659,7 +644,7 @@
             this.selectedUnitGroupBox.Controls.Add(this.groupBox5);
             this.selectedUnitGroupBox.Controls.Add(this.groupBox4);
             this.selectedUnitGroupBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.selectedUnitGroupBox.Location = new System.Drawing.Point(783, 27);
+            this.selectedUnitGroupBox.Location = new System.Drawing.Point(616, 1);
             this.selectedUnitGroupBox.Name = "selectedUnitGroupBox";
             this.selectedUnitGroupBox.Size = new System.Drawing.Size(236, 335);
             this.selectedUnitGroupBox.TabIndex = 9;
@@ -864,14 +849,14 @@
             this.ammoGrid.AllowUserToDeleteRows = false;
             this.ammoGrid.AllowUserToResizeColumns = false;
             this.ammoGrid.AllowUserToResizeRows = false;
-            dataGridViewCellStyle29.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle29.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle29.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle29.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle29.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle29.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle29.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.ammoGrid.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle29;
+            dataGridViewCellStyle45.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle45.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle45.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle45.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle45.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle45.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle45.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.ammoGrid.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle45;
             this.ammoGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.ammoGrid.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.AmmoColumn,
@@ -896,41 +881,6 @@
             this.ammoGrid.CellContentDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.ammoGrid_CellContentClick);
             this.ammoGrid.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.ammoGrid_CellContentClick);
             // 
-            // AmmoColumn
-            // 
-            dataGridViewCellStyle30.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle30.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle30.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.AmmoColumn.DefaultCellStyle = dataGridViewCellStyle30;
-            this.AmmoColumn.FillWeight = 90F;
-            this.AmmoColumn.HeaderText = "Type";
-            this.AmmoColumn.Name = "AmmoColumn";
-            this.AmmoColumn.ReadOnly = true;
-            this.AmmoColumn.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.AmmoColumn.Width = 109;
-            // 
-            // AmountColumn
-            // 
-            dataGridViewCellStyle31.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            this.AmountColumn.DefaultCellStyle = dataGridViewCellStyle31;
-            this.AmountColumn.FillWeight = 10F;
-            this.AmountColumn.HeaderText = "Amt";
-            this.AmountColumn.Name = "AmountColumn";
-            this.AmountColumn.ReadOnly = true;
-            this.AmountColumn.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.AmountColumn.Width = 50;
-            // 
-            // CapacityColumn
-            // 
-            dataGridViewCellStyle32.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            this.CapacityColumn.DefaultCellStyle = dataGridViewCellStyle32;
-            this.CapacityColumn.FillWeight = 10F;
-            this.CapacityColumn.HeaderText = "Max";
-            this.CapacityColumn.Name = "CapacityColumn";
-            this.CapacityColumn.ReadOnly = true;
-            this.CapacityColumn.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.CapacityColumn.Width = 50;
-            // 
             // groupBox5
             // 
             this.groupBox5.Controls.Add(this.typeLabel);
@@ -944,18 +894,18 @@
             // 
             // typeLabel
             // 
-            this.typeLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.typeLabel.Location = new System.Drawing.Point(6, 39);
+            this.typeLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.typeLabel.Location = new System.Drawing.Point(6, 29);
             this.typeLabel.Name = "typeLabel";
-            this.typeLabel.Size = new System.Drawing.Size(91, 20);
+            this.typeLabel.Size = new System.Drawing.Size(91, 40);
             this.typeLabel.TabIndex = 1;
             this.typeLabel.Text = "label6";
             this.typeLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // callsignLabel
             // 
-            this.callsignLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.callsignLabel.Location = new System.Drawing.Point(6, 16);
+            this.callsignLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.callsignLabel.Location = new System.Drawing.Point(6, 9);
             this.callsignLabel.Name = "callsignLabel";
             this.callsignLabel.Size = new System.Drawing.Size(91, 20);
             this.callsignLabel.TabIndex = 0;
@@ -1067,7 +1017,7 @@
             // labelUTMX
             // 
             this.labelUTMX.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelUTMX.Location = new System.Drawing.Point(679, 558);
+            this.labelUTMX.Location = new System.Drawing.Point(510, 528);
             this.labelUTMX.Name = "labelUTMX";
             this.labelUTMX.Size = new System.Drawing.Size(53, 23);
             this.labelUTMX.TabIndex = 10;
@@ -1077,7 +1027,7 @@
             // labelUTMY
             // 
             this.labelUTMY.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelUTMY.Location = new System.Drawing.Point(728, 558);
+            this.labelUTMY.Location = new System.Drawing.Point(559, 528);
             this.labelUTMY.Name = "labelUTMY";
             this.labelUTMY.Size = new System.Drawing.Size(53, 23);
             this.labelUTMY.TabIndex = 11;
@@ -1087,7 +1037,7 @@
             // label3
             // 
             this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.label3.Location = new System.Drawing.Point(643, 558);
+            this.label3.Location = new System.Drawing.Point(474, 528);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(36, 23);
             this.label3.TabIndex = 12;
@@ -1098,7 +1048,7 @@
             // 
             this.btnMapExport.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btnMapExport.Enabled = false;
-            this.btnMapExport.Location = new System.Drawing.Point(144, 558);
+            this.btnMapExport.Location = new System.Drawing.Point(141, 527);
             this.btnMapExport.Name = "btnMapExport";
             this.btnMapExport.Size = new System.Drawing.Size(125, 23);
             this.btnMapExport.TabIndex = 8;
@@ -1111,27 +1061,106 @@
             this.ScrollTimer.Interval = 20;
             this.ScrollTimer.Tick += new System.EventHandler(this.ScrollTimer_Tick);
             // 
+            // AmmoColumn
+            // 
+            dataGridViewCellStyle46.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle46.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle46.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.AmmoColumn.DefaultCellStyle = dataGridViewCellStyle46;
+            this.AmmoColumn.FillWeight = 90F;
+            this.AmmoColumn.HeaderText = "Type";
+            this.AmmoColumn.Name = "AmmoColumn";
+            this.AmmoColumn.ReadOnly = true;
+            this.AmmoColumn.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.AmmoColumn.Width = 109;
+            // 
+            // AmountColumn
+            // 
+            dataGridViewCellStyle47.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            this.AmountColumn.DefaultCellStyle = dataGridViewCellStyle47;
+            this.AmountColumn.FillWeight = 10F;
+            this.AmountColumn.HeaderText = "Amt";
+            this.AmountColumn.Name = "AmountColumn";
+            this.AmountColumn.ReadOnly = true;
+            this.AmountColumn.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.AmountColumn.Width = 50;
+            // 
+            // CapacityColumn
+            // 
+            dataGridViewCellStyle48.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            this.CapacityColumn.DefaultCellStyle = dataGridViewCellStyle48;
+            this.CapacityColumn.FillWeight = 10F;
+            this.CapacityColumn.HeaderText = "%";
+            this.CapacityColumn.Name = "CapacityColumn";
+            this.CapacityColumn.ReadOnly = true;
+            this.CapacityColumn.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.CapacityColumn.Width = 50;
+            // 
+            // mainTabControl
+            // 
+            this.mainTabControl.Alignment = System.Windows.Forms.TabAlignment.Bottom;
+            this.mainTabControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.mainTabControl.Controls.Add(this.tabPage01);
+            this.mainTabControl.Controls.Add(this.tabPage02);
+            this.mainTabControl.Controls.Add(tabPage03);
+            this.mainTabControl.Location = new System.Drawing.Point(12, 66);
+            this.mainTabControl.Name = "mainTabControl";
+            this.mainTabControl.SelectedIndex = 0;
+            this.mainTabControl.Size = new System.Drawing.Size(862, 582);
+            this.mainTabControl.TabIndex = 13;
+            // 
+            // tabPage01
+            // 
+            this.tabPage01.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.tabPage01.Controls.Add(this.selectedUnitGroupBox);
+            this.tabPage01.Controls.Add(this.mapPanel);
+            this.tabPage01.Controls.Add(this.btnMapExport);
+            this.tabPage01.Controls.Add(this.label3);
+            this.tabPage01.Controls.Add(this.oobTree);
+            this.tabPage01.Controls.Add(this.label1);
+            this.tabPage01.Controls.Add(this.labelUTMY);
+            this.tabPage01.Controls.Add(this.labelUTMX);
+            this.tabPage01.Controls.Add(this.mapShowSelector);
+            this.tabPage01.Location = new System.Drawing.Point(4, 4);
+            this.tabPage01.Name = "tabPage01";
+            this.tabPage01.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage01.Size = new System.Drawing.Size(854, 556);
+            this.tabPage01.TabIndex = 0;
+            this.tabPage01.Text = "Situation";
+            // 
+            // tabPage03
+            // 
+            tabPage03.BackColor = System.Drawing.Color.WhiteSmoke;
+            tabPage03.Controls.Add(this.playerGrid);
+            tabPage03.Location = new System.Drawing.Point(4, 4);
+            tabPage03.Name = "tabPage03";
+            tabPage03.Padding = new System.Windows.Forms.Padding(3);
+            tabPage03.Size = new System.Drawing.Size(854, 556);
+            tabPage03.TabIndex = 1;
+            tabPage03.Text = "Players";
+            // 
+            // tabPage02
+            // 
+            this.tabPage02.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.tabPage02.Controls.Add(this.eventGrid);
+            this.tabPage02.Location = new System.Drawing.Point(4, 4);
+            this.tabPage02.Name = "tabPage02";
+            this.tabPage02.Size = new System.Drawing.Size(854, 556);
+            this.tabPage02.TabIndex = 2;
+            this.tabPage02.Text = "Events";
+            // 
             // MainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1031, 732);
-            this.Controls.Add(this.btnMapExport);
-            this.Controls.Add(this.label3);
-            this.Controls.Add(this.labelUTMY);
-            this.Controls.Add(this.labelUTMX);
-            this.Controls.Add(this.mapShowSelector);
-            this.Controls.Add(this.label1);
-            this.Controls.Add(this.groupBox1);
-            this.Controls.Add(this.oobTree);
-            this.Controls.Add(this.selectedUnitGroupBox);
-            this.Controls.Add(this.groupBox3);
-            this.Controls.Add(this.mapPanel);
-            this.Controls.Add(this.forceSelector);
+            this.ClientSize = new System.Drawing.Size(884, 661);
+            this.Controls.Add(this.mainTabControl);
             this.Controls.Add(this.mainMenu);
             this.Controls.Add(this.groupBox2);
             this.MainMenuStrip = this.mainMenu;
-            this.MinimumSize = new System.Drawing.Size(800, 768);
+            this.MinimumSize = new System.Drawing.Size(900, 700);
             this.Name = "MainWindow";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Steel Beasts Campaign Manager";
@@ -1144,9 +1173,7 @@
             this.mapPanelContextMenu.ResumeLayout(false);
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
-            this.groupBox1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.eventGrid)).EndInit();
-            this.groupBox3.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.playerGrid)).EndInit();
             this.selectedUnitGroupBox.ResumeLayout(false);
             this.selectedUnitGroupBox.PerformLayout();
@@ -1156,6 +1183,11 @@
             this.groupBox5.ResumeLayout(false);
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
+            this.mainTabControl.ResumeLayout(false);
+            this.tabPage01.ResumeLayout(false);
+            this.tabPage01.PerformLayout();
+            tabPage03.ResumeLayout(false);
+            this.tabPage02.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1182,8 +1214,6 @@
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem campaignStateToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-        private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.GroupBox selectedUnitGroupBox;
         private System.Windows.Forms.Label labelCompanyHeader;
         private System.Windows.Forms.Label labelTeamHeader;
@@ -1214,9 +1244,6 @@
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label statusStrength;
-        private System.Windows.Forms.DataGridViewTextBoxColumn AmmoColumn;
-        private System.Windows.Forms.DataGridViewTextBoxColumn AmountColumn;
-        private System.Windows.Forms.DataGridViewTextBoxColumn CapacityColumn;
         private System.Windows.Forms.Label statusGroup;
         private System.Windows.Forms.ToolStripMenuItem saveToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem saveAsToolStripMenuItem;
@@ -1252,6 +1279,12 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ComboBox turnCounter;
         private System.Windows.Forms.Timer ScrollTimer;
+        private System.Windows.Forms.DataGridViewTextBoxColumn AmmoColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn AmountColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn CapacityColumn;
+        private System.Windows.Forms.TabControl mainTabControl;
+        private System.Windows.Forms.TabPage tabPage01;
+        private System.Windows.Forms.TabPage tabPage02;
     }
 }
 

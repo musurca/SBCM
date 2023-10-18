@@ -6,15 +6,14 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 
 namespace SBCM {
     public partial class MainWindow : Form {
         float _scale;
         Bitmap _mapImage;
-        Point _mapAnchor;
-        Point _mapCenter;
+        PointF _mapAnchor;
+        PointF _mapCenter;
         bool _mousePanning;
         bool _mouseMeasuring;
         float _xScroll, _yScroll;
@@ -41,19 +40,25 @@ namespace SBCM {
 
         bool _unsavedWork;
 
+        // Determine counter size from longest possible callsign
+        float _counterWidth;
+        float _counterHeight;
+
         // Brushes
+        Font _blockFont = new Font(SystemFonts.DefaultFont.FontFamily, 12.0f);
+        Font _measureFont = new Font(SystemFonts.DefaultFont.FontFamily, 10.0f);
         Pen _whitePen = new Pen(Color.White);
         Pen _redPen = new Pen(Color.Red, 2.0f);
         Pen _explosionOutline = new Pen(Color.MediumVioletRed);
         Pen _measurePen = new Pen(Color.Gray, 2.0f);
         SolidBrush _blackBrush = new SolidBrush(Color.Black);
         SolidBrush _whiteBrush = new SolidBrush(Color.White);
-        SolidBrush _selectedBrush = new SolidBrush(Color.CornflowerBlue);
+        SolidBrush _selectedBrush = new SolidBrush(Color.DarkSeaGreen);
         SolidBrush _deadBrush = new SolidBrush(Color.Gray);
         SolidBrush _deadSelectBrush = new SolidBrush(Color.DarkGray);
         SolidBrush _damagedBrush = new SolidBrush(Color.DarkGoldenrod);
         SolidBrush _damageSelectBrush = new SolidBrush(Color.Goldenrod);
-        SolidBrush _blockBrush = new SolidBrush(Color.DarkBlue);
+        SolidBrush _blockBrush = new SolidBrush(Color.DarkGreen);
         SolidBrush _fontBrush = new SolidBrush(Color.White);
         SolidBrush _explosionBrush = new SolidBrush(Color.Red);
 
@@ -77,8 +82,8 @@ namespace SBCM {
             _mouseMeasuring = false;
             _xScroll = _yScroll = 0.0f;
 
-            _mapAnchor = new Point();
-            _mapCenter = new Point();
+            _mapAnchor = new PointF();
+            _mapCenter = new PointF();
             _selectedUTMCoord = new Point();
             _measureUTM_0 = new Point();
             _measureUTM_1 = new Point();
@@ -93,8 +98,8 @@ namespace SBCM {
             _currentCampaignFileName = "";
 
             Rectangle rect = mapPanel.ClientRectangle;
-            _mapCenter.X = rect.Left + (int)((rect.Right - rect.Left) * 0.5);
-            _mapCenter.Y = rect.Top + (int)((rect.Bottom - rect.Top) * 0.5);
+            _mapCenter.X = rect.Left + ((rect.Right - rect.Left) * 0.5f);
+            _mapCenter.Y = rect.Top + ((rect.Bottom - rect.Top) * 0.5f);
 
             _oobToUnit = new Dictionary<string, object>();
             ammoGrid.ClearSelection();
@@ -118,6 +123,20 @@ namespace SBCM {
             _unsavedWork = false;
 
             mapShowSelector.SelectedItem = mapShowSelector.Items[0];
+        }
+
+        private void BuildCounterSize() {
+            Force currentForce = _forces[(string)forceSelector.SelectedItem];
+            string longestPossibleCallsign = _campaign.CallsignTemplates[currentForce.Name]
+            .LongestPossibleCallsign;
+            SizeF csSize;
+            using (Graphics g = Graphics.FromImage(new Bitmap(1, 1))) {
+                csSize = g.MeasureString(longestPossibleCallsign, _blockFont);
+            }
+            _counterWidth = csSize.Width + (2.0f / _scale);
+            _counterHeight = (float)Math.Max(
+                csSize.Height, csSize.Width * 0.5625
+            );
         }
 
         private void HideVehicleDamage() {
@@ -182,21 +201,8 @@ namespace SBCM {
 
             Force currentForce = _forces[(string)forceSelector.SelectedItem];
 
-            Font font = new Font(SystemFonts.DefaultFont.FontFamily, 12.0f / _scale);
-            // Determine counter size from longest possible callsign
-            string longestPossibleCallsign = _campaign.CallsignTemplates[currentForce.Name]
-                .LongestPossibleCallsign;
-            SizeF csSize;
-            using (Graphics g = Graphics.FromImage(new Bitmap(1, 1))) {
-                csSize = g.MeasureString(longestPossibleCallsign, font);
-            }
-            // Counters are 16:9
-            float counterWidth = csSize.Width + 2.0f;
-            float counterHeight = (float)Math.Max(
-                csSize.Height, csSize.Width * 0.5625
-            );
-            float halfCounterWidth = counterWidth / 2.0f;
-            float halfCounterHeight = counterHeight / 2.0f;
+            float halfCounterWidth = _counterWidth / 2.0f;
+            float halfCounterHeight = _counterHeight / 2.0f;
 
             _selectionRects.Clear();
             string mapViewSelect = mapShowSelector.SelectedItem.ToString();
@@ -212,8 +218,8 @@ namespace SBCM {
                             Rectangle key = new Rectangle(
                                 (int)(x_pos - halfCounterWidth),
                                 (int)(y_pos - halfCounterHeight),
-                                (int)(counterWidth),
-                                (int)(counterHeight)
+                                (int)(_counterWidth),
+                                (int)(_counterHeight)
                             );
 
                             if(_selectionRects.ContainsKey(key)) {
@@ -235,8 +241,8 @@ namespace SBCM {
                         Rectangle key = new Rectangle(
                                 (int)(x_pos - halfCounterWidth),
                                 (int)(y_pos - halfCounterHeight),
-                                (int)(counterWidth),
-                                (int)(counterHeight)
+                                (int)(_counterWidth),
+                                (int)(_counterHeight)
                             );
 
                         if (_selectionRects.ContainsKey(key)) {
@@ -247,11 +253,9 @@ namespace SBCM {
                     }
                 }
             }
-
-            font.Dispose();
         }
 
-        private void DrawMapToGraphics(MapImage map, Graphics g) {
+        private void DrawMapToGraphics(MapImage map, Graphics g, float scale=1.0f) {
             g.DrawImage(map.GetBitmap(), 0.0f, 0.0f);
 
             // Draw units/platoons on the map
@@ -259,19 +263,9 @@ namespace SBCM {
             if (map.UTM_X_Step != 0.0f && map.UTM_Y_Step != 0.0f && mapViewSelect != "Nothing") {
                 Force currentForce = _forces[(string)forceSelector.SelectedItem];
 
-                Font font = new Font(SystemFonts.DefaultFont.FontFamily, 12.0f / _scale);
-                // Determine counter size from longest possible callsign
-                string longestPossibleCallsign = _campaign.CallsignTemplates[currentForce.Name]
-                    .LongestPossibleCallsign;
-                SizeF csSize = g.MeasureString(longestPossibleCallsign, font);
-                // Counters are 16:9
-                float counterWidth = csSize.Width + (2.0f*_scale);
-                float counterHeight = (float)Math.Max(
-                    csSize.Height, csSize.Width * 0.5625
-                );
-                float halfCounterWidth = counterWidth / 2.0f;
-                float halfCounterHeight = counterHeight / 2.0f;
-                float oneOverScale = 1.0f / _scale;
+                float halfCounterWidth = _counterWidth / 2.0f;
+                float halfCounterHeight = _counterHeight / 2.0f;
+                float oneOverScale = 1.0f / scale;
                 float twoOverScale = 2.0f * oneOverScale;
                 float fiveOverScale = 5.0f * oneOverScale;
 
@@ -291,14 +285,14 @@ namespace SBCM {
                                     brush,
                                     x_pos - halfCounterWidth,
                                     y_pos - halfCounterHeight,
-                                    counterWidth, counterHeight
+                                    _counterWidth, _counterHeight
                                 );
 
                                 g.DrawRectangle(
                                     outlinePen,
                                     x_pos - halfCounterWidth - oneOverScale,
                                     y_pos - halfCounterHeight - oneOverScale,
-                                    counterWidth + twoOverScale, counterHeight + twoOverScale
+                                    _counterWidth + twoOverScale, _counterHeight + twoOverScale
                                 ); ;
 
                                 currentForce.GenerateCallsign(
@@ -308,12 +302,12 @@ namespace SBCM {
 
                                 SizeF callSize = g.MeasureString(
                                     callsign,
-                                    font
+                                    _blockFont
                                 );
 
                                 g.DrawString(
                                     callsign,
-                                    font, _fontBrush,
+                                    _blockFont, _fontBrush,
                                     x_pos - callSize.Width / 2.0f,
                                     y_pos - callSize.Height / 2.0f
                                 );
@@ -352,24 +346,24 @@ namespace SBCM {
                                 brush,
                                 x_pos - halfCounterWidth,
                                 y_pos - halfCounterHeight,
-                                counterWidth, counterHeight
+                                _counterWidth, _counterHeight
                             );
 
                             g.DrawRectangle(
                                 outlinePen,
                                 x_pos - halfCounterWidth - oneOverScale,
                                 y_pos - halfCounterHeight - oneOverScale,
-                                counterWidth + twoOverScale, counterHeight + twoOverScale
+                                _counterWidth + twoOverScale, _counterHeight + twoOverScale
                             );
 
                             SizeF callSize = g.MeasureString(
                                 u.Callsign,
-                                font
+                                _blockFont
                             );
 
                             g.DrawString(
                                 u.Callsign,
-                                font, _fontBrush,
+                                _blockFont, _fontBrush,
                                 x_pos - callSize.Width / 2.0f,
                                 y_pos - callSize.Height / 2.0f
                            );
@@ -399,12 +393,14 @@ namespace SBCM {
                     explosionPen.Dispose();
                 }
 
-                font.Dispose();
                 outlinePen.Dispose();
             }
         }
 
         private void DisposeOfBrushes() {
+            _blockFont.Dispose();
+            _measureFont.Dispose();
+
             // Dispose of brushes
             _blackBrush.Dispose();
             _whiteBrush.Dispose();
@@ -449,7 +445,7 @@ namespace SBCM {
                     _mapImage.Height + 10.0f
                 );
 
-                DrawMapToGraphics(_campaign.MapImage, g);
+                DrawMapToGraphics(_campaign.MapImage, g, _scale);
                 
                 if(_mouseMeasuring) {
                     _campaign.MapImage.UTMToImage(
@@ -473,25 +469,19 @@ namespace SBCM {
 
                     string distStr = $"{dist_m} m";
 
-                    Pen measurePen = new Pen(Color.Gray, 2.0f / _scale);
-                    Font font = new Font(SystemFonts.DefaultFont.FontFamily, 10.0f / _scale);
-
                     SizeF distStrSize = g.MeasureString(
                         distStr,
-                        font
+                        _measureFont
                     );
 
-                    g.DrawLine(measurePen, x0, y0, x1, y1);
+                    g.DrawLine(_measurePen, x0, y0, x1, y1);
                     g.DrawString(
                         distStr,
-                        font,
+                        _measureFont,
                         _whiteBrush,
                         x1 - distStrSize.Width * 0.5f,
                         y1 - distStrSize.Height - (2.0f / _scale)
                     );
-
-                    font.Dispose();
-                    measurePen.Dispose();
                 }
             }
         }
@@ -531,8 +521,8 @@ namespace SBCM {
                 // Pan the map
 
                 Point curLoc = e.Location;
-                _mapAnchor.X += (int)((e.Location.X - _startPoint.X) / _scale);
-                _mapAnchor.Y += (int)((e.Location.Y - _startPoint.Y) / _scale);
+                _mapAnchor.X += ((e.Location.X - _startPoint.X) / _scale);
+                _mapAnchor.Y += ((e.Location.Y - _startPoint.Y) / _scale);
                 _mapAnchor.X = Math.Max(-_mapImage.Width, Math.Min(0, _mapAnchor.X));
                 _mapAnchor.Y = Math.Max(-_mapImage.Height, Math.Min(0, _mapAnchor.Y));
                 _startPoint = curLoc;
@@ -622,7 +612,17 @@ namespace SBCM {
 
         private void mapPanel_Scroll(object sender, MouseEventArgs e) {
             // Map zoom
-            _scale = Math.Min(5.0f, Math.Max(0.5f, _scale * (1.0f + e.Delta / 5000.0f)));
+            _scale = Math.Min(10.0f, Math.Max(0.5f, _scale * (1.0f + e.Delta / 5000.0f)));
+
+            _blockFont.Dispose();
+            _blockFont = new Font(SystemFonts.DefaultFont.FontFamily, 12.0f / _scale);
+            _measureFont.Dispose();
+            _measureFont = new Font(SystemFonts.DefaultFont.FontFamily, 10.0f / _scale);
+            _measurePen.Dispose();
+            _measurePen = new Pen(Color.Gray, 2.0f / _scale);
+
+            BuildCounterSize();
+
             RebuildSelectionRects();
             mapPanel.Invalidate();
         }
@@ -741,6 +741,8 @@ namespace SBCM {
             PopulateTurnCounter();
             Turn curTurn = _campaign.GetLastTurn();
             turnCounter.SelectedItem = turnCounter.Items[curTurn.Index];
+
+            BuildCounterSize();
         }
 
         private void newToolStripMenuItem_Click(object sender, EventArgs e) {
@@ -820,12 +822,13 @@ namespace SBCM {
                     if (!destroyed) {
                         foreach (GunAmmo ammo in u.GetAllAmmo()) {
                             if (ammo.Type != "") {
-                                int rowIndex = ammoGrid.Rows.Add(ammo.Type, ammo.Amount.ToString(), ammo.Maximum.ToString());
-
-                                float pct = 1.0f;
+                                float pct = 0.0f;
                                 if (ammo.Maximum > 0) {
                                     pct = ammo.Amount / (float)ammo.Maximum;
                                 }
+                                int pct_rnd = (int)Math.Round(pct*100, 0);
+                                int rowIndex = ammoGrid.Rows.Add(ammo.Type, ammo.Amount.ToString(), $"{pct_rnd}%");
+
                                 if (pct < 0.05f) {
                                     ammoGrid.Rows[rowIndex].Cells[1].Style.ForeColor = Color.Red;
                                 } else if (pct <= 0.5f) {
@@ -992,12 +995,13 @@ namespace SBCM {
                     statusGroup.Text = $"{vehiclesStrength}{personnelStrength}\n{vehiclesImmobilized}{vehiclesDamaged}";
 
                     foreach (GunAmmo ammo in ammoTypes.Values) {
-                        int rowIndex = ammoGrid.Rows.Add(ammo.Type, ammo.Amount.ToString(), ammo.Maximum.ToString());
-
-                        float pct = 1.0f;
+                        float pct = 0.0f;
                         if (ammo.Maximum > 0) {
                             pct = ammo.Amount / (float)ammo.Maximum;
                         }
+                        int pct_rnd = (int)Math.Round(pct * 100, 0);
+                        int rowIndex = ammoGrid.Rows.Add(ammo.Type, ammo.Amount.ToString(), $"{pct_rnd}%");
+
                         if (pct < 0.05f) {
                             ammoGrid.Rows[rowIndex].Cells[1].Style.ForeColor = Color.Red;
                         } else if (pct <= 0.5f) {
@@ -1048,8 +1052,8 @@ namespace SBCM {
                         out float image_x, out float image_y
                     );
 
-                    _mapAnchor.X = (int)-image_x;
-                    _mapAnchor.Y = (int)-image_y;
+                    _mapAnchor.X = -image_x;
+                    _mapAnchor.Y = -image_y;
                 }
             }
         }
@@ -1176,8 +1180,8 @@ namespace SBCM {
 
         private void MainWindow_SizeChanged(object sender, EventArgs e) {
             Rectangle rect = mapPanel.ClientRectangle;
-            _mapCenter.X = rect.Left + (int)((rect.Right - rect.Left) * 0.5);
-            _mapCenter.Y = rect.Top + (int)((rect.Bottom - rect.Top) * 0.5);
+            _mapCenter.X = rect.Left + ((rect.Right - rect.Left) * 0.5f);
+            _mapCenter.Y = rect.Top + ((rect.Bottom - rect.Top) * 0.5f);
             mapPanel.Invalidate();
         }
 
@@ -1467,8 +1471,8 @@ namespace SBCM {
 
         private void ScrollTimer_Tick(object sender, EventArgs e) {
             if (_mapImage != null) {
-                _mapAnchor.X -= (int)(15.0f * _xScroll / _scale);
-                _mapAnchor.Y -= (int)(15.0f * _yScroll / _scale);
+                _mapAnchor.X -= (15.0f * _xScroll / _scale);
+                _mapAnchor.Y -= (15.0f * _yScroll / _scale);
                 _mapAnchor.X = Math.Max(-_mapImage.Width, Math.Min(0, _mapAnchor.X));
                 _mapAnchor.Y = Math.Max(-_mapImage.Height, Math.Min(0, _mapAnchor.Y));
                 mapPanel.Invalidate();
